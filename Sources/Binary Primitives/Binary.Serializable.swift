@@ -283,6 +283,26 @@ extension Binary.Serializable where Self: RawRepresentable, Self.RawValue: Strin
     }
 }
 
+// MARK: - RawRepresentable<FixedWidthInteger> Default Implementation
+
+extension Binary.Serializable where Self: RawRepresentable, Self.RawValue: FixedWidthInteger {
+    /// Default serialization for integer-backed `RawRepresentable` types.
+    ///
+    /// Serializes the raw value in native byte order for optimal performance.
+    /// For cross-platform serialization, use `rawValue.bytes(endianness:)` explicitly.
+    @inlinable
+    public static func serialize<Buffer: RangeReplaceableCollection>(
+        _ value: Self,
+        into buffer: inout Buffer
+    ) where Buffer.Element == UInt8 {
+        #if _endian(little)
+        buffer.append(contentsOf: value.rawValue.bytes(endianness: .little))
+        #else
+        buffer.append(contentsOf: value.rawValue.bytes(endianness: .big))
+        #endif
+    }
+}
+
 // MARK: - Tagged Conformance
 extension Tagged: Binary.Serializable where RawValue: Binary.Serializable {
     /// Serializes a tagged value by serializing its underlying raw value.
