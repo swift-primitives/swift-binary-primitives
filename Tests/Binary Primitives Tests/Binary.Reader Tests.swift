@@ -12,8 +12,8 @@ struct `Binary.Reader Tests` {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
         let reader = try Binary.Reader(storage: storage)
 
-        #expect(reader.readerIndex._rawValue == 0)
-        #expect(reader.remainingCount._rawValue == 5)
+        #expect(reader.readerIndex.rawValue == 0)
+        #expect(reader.remainingCount.rawValue == 5)
     }
 
     @Test
@@ -21,8 +21,8 @@ struct `Binary.Reader Tests` {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
         let reader = try Binary.Reader(storage: storage, readerIndex: 2)
 
-        #expect(reader.readerIndex._rawValue == 2)
-        #expect(reader.remainingCount._rawValue == 3)
+        #expect(reader.readerIndex.rawValue == 2)
+        #expect(reader.remainingCount.rawValue == 3)
     }
 
     @Test
@@ -30,8 +30,8 @@ struct `Binary.Reader Tests` {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
         let reader = Binary.Reader(__unchecked: (), storage: storage, readerIndex: 2)
 
-        #expect(reader.readerIndex._rawValue == 2)
-        #expect(reader.remainingCount._rawValue == 3)
+        #expect(reader.readerIndex.rawValue == 2)
+        #expect(reader.remainingCount.rawValue == 3)
     }
 
     // MARK: - Index Mutation
@@ -42,8 +42,8 @@ struct `Binary.Reader Tests` {
         var reader = try Binary.Reader(storage: storage)
 
         try reader.moveReaderIndex(by: 3)
-        #expect(reader.readerIndex._rawValue == 3)
-        #expect(reader.remainingCount._rawValue == 2)
+        #expect(reader.readerIndex.rawValue == 3)
+        #expect(reader.remainingCount.rawValue == 2)
     }
 
     @Test
@@ -52,8 +52,8 @@ struct `Binary.Reader Tests` {
         var reader = try Binary.Reader(storage: storage, readerIndex: 3)
 
         try reader.moveReaderIndex(by: -2)
-        #expect(reader.readerIndex._rawValue == 1)
-        #expect(reader.remainingCount._rawValue == 4)
+        #expect(reader.readerIndex.rawValue == 1)
+        #expect(reader.remainingCount.rawValue == 4)
     }
 
     @Test
@@ -62,8 +62,8 @@ struct `Binary.Reader Tests` {
         var reader = try Binary.Reader(storage: storage)
 
         try reader.setReaderIndex(to: 4)
-        #expect(reader.readerIndex._rawValue == 4)
-        #expect(reader.remainingCount._rawValue == 1)
+        #expect(reader.readerIndex.rawValue == 4)
+        #expect(reader.remainingCount.rawValue == 1)
     }
 
     @Test
@@ -72,8 +72,8 @@ struct `Binary.Reader Tests` {
         var reader = try Binary.Reader(storage: storage, readerIndex: 3)
 
         reader.reset()
-        #expect(reader.readerIndex._rawValue == 0)
-        #expect(reader.remainingCount._rawValue == 5)
+        #expect(reader.readerIndex.rawValue == 0)
+        #expect(reader.remainingCount.rawValue == 5)
     }
 
     // MARK: - Unchecked Variants
@@ -84,7 +84,7 @@ struct `Binary.Reader Tests` {
         var reader = try Binary.Reader(storage: storage)
 
         reader.moveReaderIndex(__unchecked: (), by: 3)
-        #expect(reader.readerIndex._rawValue == 3)
+        #expect(reader.readerIndex.rawValue == 3)
     }
 
     @Test
@@ -93,7 +93,7 @@ struct `Binary.Reader Tests` {
         var reader = try Binary.Reader(storage: storage)
 
         reader.setReaderIndex(__unchecked: (), to: 4)
-        #expect(reader.readerIndex._rawValue == 4)
+        #expect(reader.readerIndex.rawValue == 4)
     }
 
     // MARK: - Convenience Properties

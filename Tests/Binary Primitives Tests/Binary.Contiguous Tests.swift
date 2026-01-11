@@ -98,7 +98,7 @@ struct `Binary.Contiguous Tests` {
     func `rethrows overload works with throwing closure`() throws {
         let array: [UInt8] = [1, 2, 3]
 
-        let result = try array.withUnsafeBytes { ptr -> Int in
+        let result = array.withUnsafeBytes { ptr -> Int in
             ptr.count
         }
 

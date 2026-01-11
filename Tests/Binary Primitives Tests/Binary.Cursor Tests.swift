@@ -12,10 +12,10 @@ struct `Binary.Cursor Tests` {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
         let cursor = try Binary.Cursor(storage: storage)
 
-        #expect(cursor.readerIndex._rawValue == 0)
-        #expect(cursor.writerIndex._rawValue == 0)
-        #expect(cursor.readableCount._rawValue == 0)
-        #expect(cursor.writableCount._rawValue == 5)
+        #expect(cursor.readerIndex.rawValue == 0)
+        #expect(cursor.writerIndex.rawValue == 0)
+        #expect(cursor.readableCount.rawValue == 0)
+        #expect(cursor.writableCount.rawValue == 5)
     }
 
     @Test
@@ -23,10 +23,10 @@ struct `Binary.Cursor Tests` {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
         let cursor = try Binary.Cursor(storage: storage, readerIndex: 1, writerIndex: 4)
 
-        #expect(cursor.readerIndex._rawValue == 1)
-        #expect(cursor.writerIndex._rawValue == 4)
-        #expect(cursor.readableCount._rawValue == 3)
-        #expect(cursor.writableCount._rawValue == 1)
+        #expect(cursor.readerIndex.rawValue == 1)
+        #expect(cursor.writerIndex.rawValue == 4)
+        #expect(cursor.readableCount.rawValue == 3)
+        #expect(cursor.writableCount.rawValue == 1)
     }
 
     @Test
@@ -34,8 +34,8 @@ struct `Binary.Cursor Tests` {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
         let cursor = Binary.Cursor(__unchecked: (), storage: storage, readerIndex: 1, writerIndex: 4)
 
-        #expect(cursor.readerIndex._rawValue == 1)
-        #expect(cursor.writerIndex._rawValue == 4)
+        #expect(cursor.readerIndex.rawValue == 1)
+        #expect(cursor.writerIndex.rawValue == 4)
     }
 
     // MARK: - Index Mutation
@@ -46,8 +46,8 @@ struct `Binary.Cursor Tests` {
         var cursor = try Binary.Cursor(storage: storage, readerIndex: 0, writerIndex: 5)
 
         try cursor.moveReaderIndex(by: 2)
-        #expect(cursor.readerIndex._rawValue == 2)
-        #expect(cursor.readableCount._rawValue == 3)
+        #expect(cursor.readerIndex.rawValue == 2)
+        #expect(cursor.readableCount.rawValue == 3)
     }
 
     @Test
@@ -56,7 +56,7 @@ struct `Binary.Cursor Tests` {
         var cursor = try Binary.Cursor(storage: storage, readerIndex: 0, writerIndex: 5)
 
         cursor.moveReaderIndex(__unchecked: (), by: 2)
-        #expect(cursor.readerIndex._rawValue == 2)
+        #expect(cursor.readerIndex.rawValue == 2)
     }
 
     @Test
@@ -65,8 +65,8 @@ struct `Binary.Cursor Tests` {
         var cursor = try Binary.Cursor(storage: storage, readerIndex: 0, writerIndex: 2)
 
         try cursor.moveWriterIndex(by: 2)
-        #expect(cursor.writerIndex._rawValue == 4)
-        #expect(cursor.writableCount._rawValue == 1)
+        #expect(cursor.writerIndex.rawValue == 4)
+        #expect(cursor.writableCount.rawValue == 1)
     }
 
     @Test
@@ -75,7 +75,7 @@ struct `Binary.Cursor Tests` {
         var cursor = try Binary.Cursor(storage: storage, readerIndex: 0, writerIndex: 2)
 
         cursor.moveWriterIndex(__unchecked: (), by: 2)
-        #expect(cursor.writerIndex._rawValue == 4)
+        #expect(cursor.writerIndex.rawValue == 4)
     }
 
     @Test
@@ -84,7 +84,7 @@ struct `Binary.Cursor Tests` {
         var cursor = try Binary.Cursor(storage: storage, readerIndex: 0, writerIndex: 5)
 
         try cursor.setReaderIndex(to: 3)
-        #expect(cursor.readerIndex._rawValue == 3)
+        #expect(cursor.readerIndex.rawValue == 3)
     }
 
     @Test
@@ -93,7 +93,7 @@ struct `Binary.Cursor Tests` {
         var cursor = try Binary.Cursor(storage: storage, readerIndex: 0, writerIndex: 5)
 
         cursor.setReaderIndex(__unchecked: (), to: 3)
-        #expect(cursor.readerIndex._rawValue == 3)
+        #expect(cursor.readerIndex.rawValue == 3)
     }
 
     @Test
@@ -102,7 +102,7 @@ struct `Binary.Cursor Tests` {
         var cursor = try Binary.Cursor(storage: storage, readerIndex: 0, writerIndex: 2)
 
         try cursor.setWriterIndex(to: 4)
-        #expect(cursor.writerIndex._rawValue == 4)
+        #expect(cursor.writerIndex.rawValue == 4)
     }
 
     @Test
@@ -111,7 +111,7 @@ struct `Binary.Cursor Tests` {
         var cursor = try Binary.Cursor(storage: storage, readerIndex: 0, writerIndex: 2)
 
         cursor.setWriterIndex(__unchecked: (), to: 4)
-        #expect(cursor.writerIndex._rawValue == 4)
+        #expect(cursor.writerIndex.rawValue == 4)
     }
 
     @Test
@@ -120,8 +120,8 @@ struct `Binary.Cursor Tests` {
         var cursor = try Binary.Cursor(storage: storage, readerIndex: 2, writerIndex: 4)
 
         cursor.reset()
-        #expect(cursor.readerIndex._rawValue == 0)
-        #expect(cursor.writerIndex._rawValue == 0)
+        #expect(cursor.readerIndex.rawValue == 0)
+        #expect(cursor.writerIndex.rawValue == 0)
     }
 
     // MARK: - Readable/Writable Checks
@@ -231,7 +231,7 @@ struct `Binary.Cursor Tests` {
         let storage: [UInt8] = [1, 2, 3]
 
         #expect(throws: Binary.Error.self) {
-            try Binary.Cursor(storage: storage, readerIndex: -1, writerIndex: 3)
+            let _ = try Binary.Cursor(storage: storage, readerIndex: -1, writerIndex: 3)
         }
     }
 
@@ -240,7 +240,7 @@ struct `Binary.Cursor Tests` {
         let storage: [UInt8] = [1, 2, 3]
 
         #expect(throws: Binary.Error.self) {
-            try Binary.Cursor(storage: storage, readerIndex: 2, writerIndex: 1)
+            let _ = try Binary.Cursor(storage: storage, readerIndex: 2, writerIndex: 1)
         }
     }
 
@@ -249,7 +249,7 @@ struct `Binary.Cursor Tests` {
         let storage: [UInt8] = [1, 2, 3]
 
         #expect(throws: Binary.Error.self) {
-            try Binary.Cursor(storage: storage, readerIndex: 0, writerIndex: 10)
+            let _ = try Binary.Cursor(storage: storage, readerIndex: 0, writerIndex: 10)
         }
     }
 
