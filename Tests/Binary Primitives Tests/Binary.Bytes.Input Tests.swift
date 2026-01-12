@@ -248,6 +248,47 @@ struct BinaryBytesInputTests {
         }
     }
 
+    // MARK: - Sendable Conformance
+
+    @Suite("Sendable Conformance")
+    struct SendableTests {
+        @Test("Input is Sendable")
+        func inputIsSendable() {
+            let input = Binary.Bytes.Input([0x01, 0x02, 0x03])
+            // This compiles only if Input: Sendable
+            let _: any Sendable = input
+            #expect(true)
+        }
+
+        @Test("works with Parsing.First.Element combinator")
+        func worksWithFirstElementCombinator() throws {
+            var input = Binary.Bytes.Input([0x41, 0x42, 0x43])
+            let parser = Parsing.First.Element<Binary.Bytes.Input>()
+
+            let result = try parser.parse(&input)
+
+            #expect(result == 0x41)
+            #expect(input.consumedCount == 1)
+            #expect(input.count == 2)
+        }
+
+        @Test("First.Element works sequentially")
+        func firstElementWorksSequentially() throws {
+            var input = Binary.Bytes.Input([0x01, 0x02, 0x03, 0x04])
+            let parser = Parsing.First.Element<Binary.Bytes.Input>()
+
+            let first = try parser.parse(&input)
+            let second = try parser.parse(&input)
+            let third = try parser.parse(&input)
+
+            #expect(first == 0x01)
+            #expect(second == 0x02)
+            #expect(third == 0x03)
+            #expect(input.consumedCount == 3)
+            #expect(input.count == 1)
+        }
+    }
+
     // MARK: - Parsing.Parser Integration
 
     @Suite("Parsing.Parser Integration")

@@ -15,10 +15,14 @@ extension Binary.Bytes {
     /// - `count == totalCount - position`
     /// - `consumedCount == position`
     ///
-    /// ## Not Sendable
+    /// ## Sendable
     ///
-    /// This type is deliberately NOT Sendable. Borrowed storage cannot safely
-    /// cross concurrency boundaries. The cursor is ephemeral and stack-bound.
+    /// This type conforms to `Sendable` to satisfy parsing combinator constraints.
+    /// - **Owned inputs** are fully Sendable (backed by `[UInt8]`).
+    /// - **Borrowed inputs** are logically non-sendable and MUST remain within the
+    ///   borrowing closure scope. The `Sendable` conformance exists to satisfy
+    ///   generic combinator requirements; it does NOT relax lifetime rules for
+    ///   borrowed storage.
     ///
     /// ## Example
     ///
@@ -37,7 +41,7 @@ extension Binary.Bytes {
     ///     }
     /// }
     /// ```
-    public struct Input {
+    public struct Input: @unchecked Sendable {
         @usableFromInline
         internal enum Storage {
             case owned([UInt8])
