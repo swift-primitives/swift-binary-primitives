@@ -7,7 +7,10 @@ extension Binary.Bytes.Input {
     @inlinable
     public subscript(offset offset: Int) -> UInt8 {
         precondition(offset >= 0 && offset < count, "offset out of bounds")
-        return bytes[position + offset]
+        switch storage {
+        case .owned(let bytes): return bytes[position + offset]
+        case .borrowed(let buffer): return buffer[position + offset]
+        }
     }
 
     /// Checks if the remaining bytes start with the given prefix.
@@ -19,9 +22,17 @@ extension Binary.Bytes.Input {
     where Prefix.Element == UInt8 {
         guard prefix.count <= count else { return false }
         var idx = position
-        for byte in prefix {
-            if bytes[idx] != byte { return false }
-            idx += 1
+        switch storage {
+        case .owned(let bytes):
+            for byte in prefix {
+                if bytes[idx] != byte { return false }
+                idx += 1
+            }
+        case .borrowed(let buffer):
+            for byte in prefix {
+                if buffer[idx] != byte { return false }
+                idx += 1
+            }
         }
         return true
     }

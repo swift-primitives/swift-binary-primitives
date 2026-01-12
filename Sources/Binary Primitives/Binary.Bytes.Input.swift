@@ -2,22 +2,23 @@ extension Binary.Bytes {
     /// Escapable input cursor for bytes parsing.
     ///
     /// This type provides an escapable cursor over bytes that can be used as
-    /// `Parsing.Parser.Input`. It conforms to `Parsing.Input`, enabling use
-    /// with all generic parsing combinators.
+    /// `Parsing.Parser.Input`. Supports both owned and borrowed storage.
     ///
-    /// ## Design Rationale
+    /// ## Borrowed Storage Safety
     ///
-    /// Swift 6.2 does not allow `~Escapable` constraints on protocol associated
-    /// types. Since `Span<UInt8>` is non-escapable, parsers cannot declare
-    /// `Input == Span<UInt8>` directly. This cursor type bridges that gap:
-    ///
-    /// - It is **escapable** (can be stored in protocol associated types)
-    /// - It uses **Span internally** for zero-copy parsing when available
-    /// - It tracks **consumed count** for returning `(value, count)` results
+    /// When initialized with `init(borrowing:)`, the cursor borrows external storage.
+    /// It MUST NOT escape the closure scope that owns the buffer pointer.
     ///
     /// ## Invariants
     ///
-    /// `0 <= position <= bytes.count`
+    /// - `0 <= position <= totalCount`
+    /// - `count == totalCount - position`
+    /// - `consumedCount == position`
+    ///
+    /// ## Not Sendable
+    ///
+    /// This type is deliberately NOT Sendable. Borrowed storage cannot safely
+    /// cross concurrency boundaries. The cursor is ephemeral and stack-bound.
     ///
     /// ## Example
     ///
@@ -36,17 +37,17 @@ extension Binary.Bytes {
     ///     }
     /// }
     /// ```
-    public struct Input: Sendable {
-        /// The underlying byte storage (materialized for escapability).
+    public struct Input {
         @usableFromInline
-        internal var bytes: [UInt8]
+        internal enum Storage {
+            case owned([UInt8])
+            case borrowed(UnsafeBufferPointer<UInt8>)
+        }
 
-        /// Current position in the buffer.
+        @usableFromInline
+        internal var storage: Storage
+
         @usableFromInline
         internal var position: Int
-
-        /// The initial count at construction (for computing consumed count).
-        @usableFromInline
-        internal let initialCount: Int
     }
 }

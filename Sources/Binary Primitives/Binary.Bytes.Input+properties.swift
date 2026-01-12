@@ -1,29 +1,32 @@
 extension Binary.Bytes.Input {
-    /// Whether there are no more bytes to parse.
-    @inlinable
-    public var isEmpty: Bool {
-        position >= bytes.count
+    /// Total length of the underlying storage.
+    @usableFromInline
+    internal var totalCount: Int {
+        switch storage {
+        case .owned(let bytes): return bytes.count
+        case .borrowed(let buffer): return buffer.count
+        }
     }
 
     /// The number of bytes remaining to parse.
     @inlinable
-    public var count: Int {
-        bytes.count - position
-    }
+    public var count: Int { totalCount - position }
+
+    /// Whether there are no more bytes to parse.
+    @inlinable
+    public var isEmpty: Bool { position == totalCount }
+
+    /// The number of bytes consumed since construction (canonical measure).
+    @inlinable
+    public var consumedCount: Int { position }
 
     /// The first byte, or `nil` if empty.
     @inlinable
     public var first: UInt8? {
-        guard position < bytes.count else { return nil }
-        return bytes[position]
-    }
-
-    /// The number of bytes consumed since construction.
-    ///
-    /// This enables returning `(value, count)` from prefix parsing
-    /// without baking a remainder type into the API.
-    @inlinable
-    public var consumedCount: Int {
-        position
+        guard position < totalCount else { return nil }
+        switch storage {
+        case .owned(let bytes): return bytes[position]
+        case .borrowed(let buffer): return buffer[position]
+        }
     }
 }

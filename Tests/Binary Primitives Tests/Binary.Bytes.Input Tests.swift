@@ -196,21 +196,6 @@ struct BinaryBytesInputTests {
         }
     }
 
-    // MARK: - Sendable
-
-    @Suite("Sendable")
-    struct SendableTests {
-        @Test("can be sent to concurrent context")
-        func canBeSentToConcurrentContext() async {
-            let input = Binary.Bytes.Input([0x01, 0x02, 0x03])
-            let task = Task {
-                input.count
-            }
-            let count = await task.value
-            #expect(count == 3)
-        }
-    }
-
     // MARK: - Usage Pattern
 
     @Suite("Usage Pattern")
@@ -263,30 +248,41 @@ struct BinaryBytesInputTests {
         }
     }
 
-    // MARK: - Parsing.Input Conformance
+    // MARK: - Parsing.Parser Integration
 
-    @Suite("Parsing.Input Conformance")
-    struct ParsingInputConformanceTests {
-        @Test("works with Parsing.First.Element")
-        func worksWithFirstElement() throws {
+    @Suite("Parsing.Parser Integration")
+    struct ParsingParserIntegrationTests {
+        /// Local test parser that consumes and returns the first byte.
+        private struct FirstByte: Parsing.Parser {
+            typealias Input = Binary.Bytes.Input
+            typealias Output = UInt8
+            typealias Failure = Never
+
+            func parse(_ input: inout Input) -> UInt8 {
+                input.removeFirst()
+            }
+        }
+
+        @Test("works with custom parser")
+        func worksWithCustomParser() {
             var input = Binary.Bytes.Input([0x41, 0x42, 0x43])
-            let parser = Parsing.First.Element<Binary.Bytes.Input>()
+            let parser = FirstByte()
 
-            let result = try parser.parse(&input)
+            let result = parser.parse(&input)
 
             #expect(result == 0x41)
             #expect(input.consumedCount == 1)
             #expect(input.count == 2)
         }
 
-        @Test("supports sequential parsing with combinators")
-        func supportsSequentialParsing() throws {
+        @Test("supports sequential parsing")
+        func supportsSequentialParsing() {
             var input = Binary.Bytes.Input([0x01, 0x02, 0x03, 0x04])
-            let parser = Parsing.First.Element<Binary.Bytes.Input>()
+            let parser = FirstByte()
 
-            let first = try parser.parse(&input)
-            let second = try parser.parse(&input)
-            let third = try parser.parse(&input)
+            let first = parser.parse(&input)
+            let second = parser.parse(&input)
+            let third = parser.parse(&input)
 
             #expect(first == 0x01)
             #expect(second == 0x02)
@@ -295,17 +291,17 @@ struct BinaryBytesInputTests {
             #expect(input.count == 1)
         }
 
-        @Test("combinators compose correctly")
-        func combinatorsComposeCorrectly() throws {
+        @Test("parsers compose correctly")
+        func parsersComposeCorrectly() {
             var input = Binary.Bytes.Input([0x41, 0x42])
-            let parser = Parsing.First.Element<Binary.Bytes.Input>()
+            let parser = FirstByte()
 
             // Parse first byte
-            let first = try parser.parse(&input)
+            let first = parser.parse(&input)
             #expect(first == 0x41)
 
             // Parse second byte
-            let second = try parser.parse(&input)
+            let second = parser.parse(&input)
             #expect(second == 0x42)
 
             // Input is now empty

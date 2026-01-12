@@ -6,9 +6,14 @@ extension Binary.Bytes.Input {
     @inlinable
     @discardableResult
     public mutating func removeFirst() -> UInt8 {
-        precondition(position < bytes.count, "removeFirst() called on empty input")
-        defer { position += 1 }
-        return bytes[position]
+        precondition(position < totalCount, "removeFirst() called on empty input")
+        let byte: UInt8
+        switch storage {
+        case .owned(let bytes): byte = bytes[position]
+        case .borrowed(let buffer): byte = buffer[position]
+        }
+        position += 1
+        return byte
     }
 
     /// Removes the first `n` bytes.
@@ -17,8 +22,7 @@ extension Binary.Bytes.Input {
     /// - Precondition: `n >= 0` and `n <= count`.
     @inlinable
     public mutating func removeFirst(_ n: Int) {
-        precondition(n >= 0, "removeFirst(_:) called with negative count")
-        precondition(n <= count, "removeFirst(_:) called with count exceeding remaining bytes")
+        precondition(n >= 0 && n <= count)
         position += n
     }
 }

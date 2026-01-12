@@ -1,18 +1,13 @@
 extension Binary.Bytes.Input {
     /// Creates an input cursor from any byte collection.
     ///
-    /// Uses `withContiguousStorageIfAvailable` for contiguous collections,
-    /// otherwise materializes to an array.
+    /// Materializes to an array for owned storage.
     ///
     /// - Parameter bytes: The bytes to parse.
     @inlinable
     public init<Bytes: Collection>(_ bytes: Bytes) where Bytes.Element == UInt8 {
-        // Materialize to array for escapability
-        // This is the slow path; the fast path uses Span within bridge implementations
-        let array = Array(bytes)
-        self.bytes = array
+        self.storage = .owned(Array(bytes))
         self.position = 0
-        self.initialCount = array.count
     }
 
     /// Creates an input cursor from an array (no copy needed).
@@ -20,9 +15,8 @@ extension Binary.Bytes.Input {
     /// - Parameter bytes: The byte array to parse.
     @inlinable
     public init(_ bytes: [UInt8]) {
-        self.bytes = bytes
+        self.storage = .owned(bytes)
         self.position = 0
-        self.initialCount = bytes.count
     }
 
     /// Creates an input cursor from an array slice.
@@ -30,8 +24,20 @@ extension Binary.Bytes.Input {
     /// - Parameter bytes: The byte slice to parse.
     @inlinable
     public init(_ bytes: ArraySlice<UInt8>) {
-        self.bytes = Array(bytes)
+        self.storage = .owned(Array(bytes))
         self.position = 0
-        self.initialCount = bytes.count
+    }
+
+    /// Creates an input cursor that borrows external buffer storage.
+    ///
+    /// - Warning: The cursor MUST NOT escape the closure scope that owns
+    ///   the buffer pointer. Use only within `withUnsafeBufferPointer` or
+    ///   `withContiguousStorageIfAvailable` closures.
+    ///
+    /// - Parameter buffer: The buffer to borrow.
+    @inlinable
+    public init(borrowing buffer: UnsafeBufferPointer<UInt8>) {
+        self.storage = .borrowed(buffer)
+        self.position = 0
     }
 }
