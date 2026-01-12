@@ -21,6 +21,7 @@ let package = Package(
         .package(path: "../swift-dimension-primitives"),
         .package(path: "../swift-formatting-primitives"),
         .package(path: "../swift-parsing-primitives"),
+        .package(path: "../swift-serialization-primitives"),
         .package(path: "../swift-test-primitives"),
     ],
     targets: [
@@ -30,6 +31,7 @@ let package = Package(
                 .product(name: "Dimension Primitives", package: "swift-dimension-primitives"),
                 .product(name: "Formatting Primitives", package: "swift-formatting-primitives"),
                 .product(name: "Parsing Primitives", package: "swift-parsing-primitives"),
+                .product(name: "Serialization Primitives", package: "swift-serialization-primitives"),
             ]
         ),
         .testTarget(
