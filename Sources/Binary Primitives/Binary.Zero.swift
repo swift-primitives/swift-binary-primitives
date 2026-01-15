@@ -19,9 +19,9 @@ extension Binary {
         // swiftlint:disable:next empty_count
         guard buffer.count > 0 else { return }
 
-        buffer.withUnsafeMutableBytes { ptr in
+        unsafe buffer.withBytes.mutable { ptr in
             guard let base = ptr.baseAddress else { return }
-            base.initializeMemory(as: UInt8.self, repeating: 0, count: ptr.count)
+            unsafe base.initializeMemory(as: UInt8.self, repeating: 0, count: ptr.count)
         }
     }
 
@@ -51,10 +51,9 @@ extension Binary {
 
         guard !range.isEmpty else { return }
 
-        buffer.withUnsafeMutableBytes { ptr in
+        unsafe buffer.withBytes.mutable(in: range) { ptr in
             guard let base = ptr.baseAddress else { return }
-            base.advanced(by: range.lowerBound)
-                .initializeMemory(as: UInt8.self, repeating: 0, count: range.count)
+            unsafe base.initializeMemory(as: UInt8.self, repeating: 0, count: ptr.count)
         }
     }
 

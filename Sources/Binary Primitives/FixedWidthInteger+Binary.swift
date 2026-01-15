@@ -181,7 +181,7 @@ extension FixedWidthInteger {
             converted = value.bigEndian
         }
 
-        return Swift.withUnsafeBytes(of: converted) { Array($0) }
+        return unsafe Swift.withUnsafeBytes(of: converted) { unsafe Array($0) }
     }
 
     /// Converts the integer to a byte array.
@@ -232,7 +232,7 @@ extension FixedWidthInteger {
     public init?(bytes: [UInt8], endianness: Binary.Endianness = .little) {
         guard bytes.count == MemoryLayout<Self>.size else { return nil }
 
-        let value = bytes.withUnsafeBytes { $0.load(as: Self.self) }
+        let value = unsafe bytes.withUnsafeBytes { unsafe $0.load(as: Self.self) }
 
         switch endianness {
         case .little:

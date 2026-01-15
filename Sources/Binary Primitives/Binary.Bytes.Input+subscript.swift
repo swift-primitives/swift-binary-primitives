@@ -7,9 +7,9 @@ extension Binary.Bytes.Input {
     @inlinable
     public subscript(offset offset: Int) -> UInt8 {
         precondition(offset >= 0 && offset < count, "offset out of bounds")
-        switch storage {
+        switch unsafe storage {
         case .owned(let bytes): return bytes[position + offset]
-        case .borrowed(let buffer): return buffer[position + offset]
+        case .borrowed(let buffer): return unsafe buffer[position + offset]
         }
     }
 
@@ -22,7 +22,7 @@ extension Binary.Bytes.Input {
     where Prefix.Element == UInt8 {
         guard prefix.count <= count else { return false }
         var idx = position
-        switch storage {
+        switch unsafe storage {
         case .owned(let bytes):
             for byte in prefix {
                 if bytes[idx] != byte { return false }
@@ -30,7 +30,7 @@ extension Binary.Bytes.Input {
             }
         case .borrowed(let buffer):
             for byte in prefix {
-                if buffer[idx] != byte { return false }
+                if unsafe buffer[idx] != byte { return false }
                 idx += 1
             }
         }

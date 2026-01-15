@@ -55,7 +55,7 @@ struct `Binary.Contiguous Tests` {
     @Test
     func `generic function accepts Binary.Contiguous`() {
         func readFirstByte(_ data: some Binary.Contiguous) -> UInt8? {
-            data.withUnsafeBytes { ptr in
+            unsafe data.withBytes { ptr in
                 ptr.first
             }
         }
@@ -86,7 +86,7 @@ struct `Binary.Contiguous Tests` {
         let array: [UInt8] = [1, 2, 3]
 
         #expect(throws: TestError.expected) {
-            try array.withUnsafeBytes { (_: UnsafeRawBufferPointer) throws(TestError) in
+            try unsafe array.withBytes { (_: UnsafeRawBufferPointer) throws(TestError) in
                 throw TestError.expected
             }
         }
@@ -98,7 +98,7 @@ struct `Binary.Contiguous Tests` {
     func `rethrows overload works with throwing closure`() throws {
         let array: [UInt8] = [1, 2, 3]
 
-        let result = array.withUnsafeBytes { ptr -> Int in
+        let result = unsafe array.withBytes { ptr -> Int in
             ptr.count
         }
 

@@ -299,9 +299,6 @@ extension Binary.Reader {
     ) throws(E) -> R {
         let readerIdx = Int(_readerIndex._storage)
         let storageCount = Int(_count)
-        return try storage.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) throws(E) -> R in
-            let slice = UnsafeRawBufferPointer(rebasing: ptr[readerIdx..<storageCount])
-            return try body(slice)
-        }
+        return try unsafe storage.withBytes(in: readerIdx..<storageCount, body)
     }
 }

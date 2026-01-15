@@ -8,9 +8,9 @@ extension Binary.Bytes.Input {
     public mutating func removeFirst() -> UInt8 {
         precondition(position < totalCount, "removeFirst() called on empty input")
         let byte: UInt8
-        switch storage {
+        switch unsafe storage {
         case .owned(let bytes): byte = bytes[position]
-        case .borrowed(let buffer): byte = buffer[position]
+        case .borrowed(let buffer): byte = unsafe buffer[position]
         }
         position += 1
         return byte

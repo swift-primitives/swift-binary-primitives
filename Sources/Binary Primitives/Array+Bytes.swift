@@ -31,7 +31,7 @@ extension [UInt8] {
         case .big:
             converted = value.bigEndian
         }
-        self = Swift.withUnsafeBytes(of: converted) { Array($0) }
+        self = unsafe Swift.withUnsafeBytes(of: converted) { unsafe Array($0) }
     }
 }
 

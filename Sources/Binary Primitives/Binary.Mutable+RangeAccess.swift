@@ -1,117 +1,57 @@
-extension Binary.Mutable {
-    /// Provides mutable access to a subrange of bytes.
-    ///
-    /// This is the universal fallback for mutable range access when direct
-    /// subscript access is not available. The closure-based API ensures
-    /// proper lifetime scoping.
-    ///
-    /// ## Example
-    ///
-    /// ```swift
-    /// func zeroHeader<T: Binary.Mutable>(_ data: inout T) {
-    ///     data.withMutableBytes(in: 0..<16) { header in
-    ///         header.initializeMemory(as: UInt8.self, repeating: 0)
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// - Parameters:
-    ///   - range: The range of bytes to access.
-    ///   - body: A closure that receives a mutable buffer pointer to the range.
-    /// - Returns: The value returned by `body`.
-    /// - Throws: The error thrown by `body`.
-    ///
-    /// - Precondition: `range.lowerBound >= 0`
-    /// - Precondition: `range.upperBound <= count`
-    @inlinable
-    public mutating func withMutableBytes<R, E: Swift.Error>(
-        in range: Range<Int>,
-        _ body: (UnsafeMutableRawBufferPointer) throws(E) -> R
-    ) throws(E) -> R {
-        try withUnsafeMutableBytes { (buffer: UnsafeMutableRawBufferPointer) throws(E) -> R in
-            precondition(range.lowerBound >= 0, "range.lowerBound must be non-negative")
-            precondition(range.upperBound <= buffer.count, "range.upperBound exceeds buffer bounds")
-            let subBuffer = UnsafeMutableRawBufferPointer(rebasing: buffer[range])
-            return try body(subBuffer)
-        }
-    }
+// MARK: - Binary.Contiguous Unsafe Access
 
-    /// Provides mutable access to bytes from a given offset to the end.
+extension Binary.Contiguous where Self: ~Copyable {
+    /// Unsafe escape hatch for closure-based byte access.
     ///
-    /// - Parameters:
-    ///   - offset: The starting offset.
-    ///   - body: A closure that receives a mutable buffer pointer.
-    /// - Returns: The value returned by `body`.
-    /// - Throws: The error thrown by `body`.
+    /// Prefer `bytes` for all new code.
+    ///
+    /// Usage:
+    /// ```swift
+    /// unsafe data.withBytes { ptr in ... }
+    /// unsafe data.withBytes(in: 0..<16) { ptr in ... }
+    /// ```
     @inlinable
-    public mutating func withMutableBytes<R, E: Swift.Error>(
-        from offset: Int,
-        _ body: (UnsafeMutableRawBufferPointer) throws(E) -> R
-    ) throws(E) -> R {
-        try withUnsafeMutableBytes { (buffer: UnsafeMutableRawBufferPointer) throws(E) -> R in
-            precondition(offset >= 0, "offset must be non-negative")
-            precondition(offset <= buffer.count, "offset exceeds buffer bounds")
-            let subBuffer = UnsafeMutableRawBufferPointer(rebasing: buffer[offset...])
-            return try body(subBuffer)
+    public var withBytes: Binary.WithBytes {
+        @_lifetime(borrow self)
+        borrowing get {
+            var ptr: UnsafePointer<UInt8>!
+            var cnt: Int = 0
+            let span = bytes
+            unsafe span.withUnsafeBufferPointer { buffer in
+                unsafe ptr = buffer.baseAddress
+                cnt = buffer.count
+            }
+            return unsafe Binary.WithBytes(pointer: ptr, count: cnt)
         }
     }
 }
 
-extension Binary.Contiguous {
-    /// Provides read-only access to a subrange of bytes.
-    ///
-    /// This is the universal fallback for range access when direct
-    /// subscript access is not available. The closure-based API ensures
-    /// proper lifetime scoping.
-    ///
-    /// ## Example
-    ///
-    /// ```swift
-    /// func readHeader<T: Binary.Contiguous>(_ data: borrowing T) -> UInt32 {
-    ///     data.withUnsafeBytes(in: 0..<4) { header in
-    ///         header.loadUnaligned(as: UInt32.self)
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// - Parameters:
-    ///   - range: The range of bytes to access.
-    ///   - body: A closure that receives a buffer pointer to the range.
-    /// - Returns: The value returned by `body`.
-    /// - Throws: The error thrown by `body`.
-    ///
-    /// - Precondition: `range.lowerBound >= 0`
-    /// - Precondition: `range.upperBound <= count`
-    @inlinable
-    public func withUnsafeBytes<R, E: Swift.Error>(
-        in range: Range<Int>,
-        _ body: (UnsafeRawBufferPointer) throws(E) -> R
-    ) throws(E) -> R {
-        try withUnsafeBytes { (buffer: UnsafeRawBufferPointer) throws(E) -> R in
-            precondition(range.lowerBound >= 0, "range.lowerBound must be non-negative")
-            precondition(range.upperBound <= buffer.count, "range.upperBound exceeds buffer bounds")
-            let subBuffer = UnsafeRawBufferPointer(rebasing: buffer[range])
-            return try body(subBuffer)
-        }
-    }
+// MARK: - Binary.Mutable Unsafe Access
 
-    /// Provides read-only access to bytes from a given offset to the end.
+extension Binary.Mutable where Self: ~Copyable {
+    /// Unsafe escape hatch for closure-based byte access.
     ///
-    /// - Parameters:
-    ///   - offset: The starting offset.
-    ///   - body: A closure that receives a buffer pointer.
-    /// - Returns: The value returned by `body`.
-    /// - Throws: The error thrown by `body`.
+    /// Prefer `mutableBytes` for all new code.
+    ///
+    /// Usage:
+    /// ```swift
+    /// unsafe buffer.withBytes { ptr in ... }              // read-only
+    /// unsafe buffer.withBytes.mutable { ptr in ... }      // mutable
+    /// unsafe buffer.withBytes.mutable(in: 0..<16) { ... } // mutable subrange
+    /// ```
     @inlinable
-    public func withUnsafeBytes<R, E: Swift.Error>(
-        from offset: Int,
-        _ body: (UnsafeRawBufferPointer) throws(E) -> R
-    ) throws(E) -> R {
-        try withUnsafeBytes { (buffer: UnsafeRawBufferPointer) throws(E) -> R in
-            precondition(offset >= 0, "offset must be non-negative")
-            precondition(offset <= buffer.count, "offset exceeds buffer bounds")
-            let subBuffer = UnsafeRawBufferPointer(rebasing: buffer[offset...])
-            return try body(subBuffer)
+    public var withBytes: Binary.WithMutableBytes {
+        @_lifetime(&self)
+        mutating get {
+            var ptr: UnsafeMutablePointer<UInt8>!
+            var cnt: Int = 0
+            // Use read-only access to get the pointer, then cast to mutable
+            // This is safe because we have exclusive mutable access to self
+            unsafe mutableBytes.withUnsafeBufferPointer { buffer in
+                unsafe ptr = UnsafeMutablePointer(mutating: buffer.baseAddress!)
+                cnt = buffer.count
+            }
+            return unsafe Binary.WithMutableBytes(pointer: ptr, count: cnt)
         }
     }
 }

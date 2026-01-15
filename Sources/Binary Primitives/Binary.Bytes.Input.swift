@@ -41,7 +41,9 @@ extension Binary.Bytes {
     ///     }
     /// }
     /// ```
+    @safe
     public struct Input: @unchecked Sendable {
+        @unsafe
         @usableFromInline
         internal enum Storage {
             case owned([UInt8])

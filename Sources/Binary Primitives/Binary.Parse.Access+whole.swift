@@ -9,7 +9,7 @@ extension Binary.Parse.Access {
     @inlinable
     public func whole<Bytes: Collection>(
         _ bytes: Bytes
-    ) throws(Parsing.Either<P.Failure, Binary.Parse.Error>) -> P.Output
+    ) throws(Parsing.Error.Either<P.Failure, Binary.Parse.Error>) -> P.Output
     where Bytes.Element == UInt8 {
         var input = Binary.Bytes.Input(bytes)
         let value: P.Output

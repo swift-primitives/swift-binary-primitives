@@ -449,10 +449,7 @@ extension Binary.Cursor where Storage: ~Copyable {
     ) throws(E) -> R {
         let readerIdx = Int(_readerIndex._storage)
         let writerIdx = Int(_writerIndex._storage)
-        return try storage.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) throws(E) -> R in
-            let slice = UnsafeRawBufferPointer(rebasing: ptr[readerIdx..<writerIdx])
-            return try body(slice)
-        }
+        return try unsafe storage.withBytes(in: readerIdx..<writerIdx, body)
     }
 
     /// Provides mutable access to the writable bytes region.
@@ -465,10 +462,6 @@ extension Binary.Cursor where Storage: ~Copyable {
     ) throws(E) -> R {
         let writerIdx = Int(_writerIndex._storage)
         let storageCount = Int(_count)
-        return try storage.withUnsafeMutableBytes {
-            (ptr: UnsafeMutableRawBufferPointer) throws(E) -> R in
-            let slice = UnsafeMutableRawBufferPointer(rebasing: ptr[writerIdx..<storageCount])
-            return try body(slice)
-        }
+        return try unsafe storage.withBytes.mutable(in: writerIdx..<storageCount, body)
     }
 }

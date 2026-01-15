@@ -16,7 +16,7 @@ extension Binary.Bytes {
         _ buffer: UnsafeBufferPointer<UInt8>,
         _ body: (inout Binary.Bytes.Input) throws(E) -> T
     ) throws(E) -> T {
-        var input = Binary.Bytes.Input(borrowing: buffer)
+        var input = unsafe Binary.Bytes.Input(borrowing: buffer)
         return try body(&input)
     }
 
@@ -35,8 +35,8 @@ extension Binary.Bytes {
         _ body: (inout Binary.Bytes.Input) throws(E) -> T
     ) throws(E) -> T {
         var r: Result<T, E>?
-        bytes.withUnsafeBufferPointer { buffer in
-            var input = Binary.Bytes.Input(borrowing: buffer)
+        unsafe bytes.withUnsafeBufferPointer { buffer in
+            var input = unsafe Binary.Bytes.Input(borrowing: buffer)
             do throws(E) {
                 let value = try body(&input)
                 r = .success(value)
@@ -65,7 +65,7 @@ extension Binary.Bytes {
     ) throws(E) -> T where Bytes: Collection, Bytes.Element == UInt8 {
         var r: Result<T, E>?
         _ = bytes.withContiguousStorageIfAvailable { buffer in
-            var input = Binary.Bytes.Input(borrowing: buffer)
+            var input = unsafe Binary.Bytes.Input(borrowing: buffer)
             do throws(E) {
                 let value = try body(&input)
                 r = .success(value)
@@ -97,7 +97,7 @@ extension Binary.Bytes {
     ) throws(E) -> T {
         var r: Result<T, E>?
         _ = string.utf8.withContiguousStorageIfAvailable { buffer in
-            var input = Binary.Bytes.Input(borrowing: buffer)
+            var input = unsafe Binary.Bytes.Input(borrowing: buffer)
             do throws(E) {
                 let value = try body(&input)
                 r = .success(value)

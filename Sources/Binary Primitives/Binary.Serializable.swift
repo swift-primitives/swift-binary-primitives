@@ -114,7 +114,7 @@ extension Binary.Serializable {
         // Use Result to bridge typed throws across non-typed-throws boundary
         var result: Result<R, E>!
         buffer.withUnsafeBufferPointer { bufferPointer in
-            let span = Span(_unsafeElements: bufferPointer)
+            let span = unsafe Span(_unsafeElements: bufferPointer)
             do throws(E) {
                 result = .success(try body(span))
             } catch {
@@ -251,7 +251,7 @@ extension Binary.Serializable where Self: RawRepresentable, Self.RawValue == [UI
     ) throws(E) -> R {
         var result: Result<R, E>!
         value.rawValue.withUnsafeBufferPointer { bufferPointer in
-            let span = Span(_unsafeElements: bufferPointer)
+            let span = unsafe Span(_unsafeElements: bufferPointer)
             do throws(E) {
                 result = .success(try body(span))
             } catch {
@@ -272,7 +272,7 @@ extension Binary.Serializable where Self: RawRepresentable, Self.RawValue: Strin
         let utf8 = ContiguousArray(value.rawValue.utf8)
         var result: Result<R, E>!
         utf8.withUnsafeBufferPointer { bufferPointer in
-            let span = Span(_unsafeElements: bufferPointer)
+            let span = unsafe Span(_unsafeElements: bufferPointer)
             do throws(E) {
                 result = .success(try body(span))
             } catch {
@@ -346,7 +346,7 @@ extension Array: Binary.Serializable where Element == UInt8 {
     ) throws(E) -> R {
         var result: Result<R, E>!
         value.withUnsafeBufferPointer { bufferPointer in
-            let span = Span(_unsafeElements: bufferPointer)
+            let span = unsafe Span(_unsafeElements: bufferPointer)
             do throws(E) {
                 result = .success(try body(span))
             } catch {
@@ -375,7 +375,7 @@ extension ContiguousArray: Binary.Serializable where Element == UInt8 {
     ) throws(E) -> R {
         var result: Result<R, E>!
         value.withUnsafeBufferPointer { bufferPointer in
-            let span = Span(_unsafeElements: bufferPointer)
+            let span = unsafe Span(_unsafeElements: bufferPointer)
             do throws(E) {
                 result = .success(try body(span))
             } catch {

@@ -38,13 +38,18 @@ extension Binary {
         // swiftlint:disable:next empty_count
         guard source.count > 0 else { return }
 
-        source.withUnsafeBytes { srcBuffer in
-            destination.withUnsafeMutableBytes { dstBuffer in
-                guard let srcBase = srcBuffer.baseAddress,
-                    let dstBase = dstBuffer.baseAddress
-                else { return }
-                dstBase.advanced(by: offset)
-                    .copyMemory(from: srcBase, byteCount: srcBuffer.count)
+        // Get source pointer first, then copy into destination
+        unsafe source.withBytes { srcBuffer in
+            guard let srcBase = srcBuffer.baseAddress else { return }
+
+            // Store pointer temporarily - valid within this scope
+            let srcPtr = unsafe srcBase
+            let count = srcBuffer.count
+
+            // Now access destination mutably
+            unsafe destination.withBytes.mutable(in: offset..<(offset + count)) { dstBuffer in
+                guard let dstBase = dstBuffer.baseAddress else { return }
+                unsafe dstBase.copyMemory(from: srcPtr, byteCount: count)
             }
         }
     }
@@ -73,14 +78,14 @@ extension Binary {
             "source exceeds destination bounds"
         )
 
-        guard !source.isEmpty else { return }
+        let sourceCount = source.count
+        guard unsafe !source.isEmpty else { return }
 
-        destination.withUnsafeMutableBytes { dstBuffer in
+        unsafe destination.withBytes.mutable(in: offset..<(offset + sourceCount)) { dstBuffer in
             guard let srcBase = source.baseAddress,
                 let dstBase = dstBuffer.baseAddress
             else { return }
-            dstBase.advanced(by: offset)
-                .copyMemory(from: srcBase, byteCount: source.count)
+            unsafe dstBase.copyMemory(from: srcBase, byteCount: sourceCount)
         }
     }
 
@@ -111,11 +116,11 @@ extension Binary {
         // swiftlint:disable:next empty_count
         guard source.count > 0 else { return }
 
-        source.withUnsafeBytes { srcBuffer in
+        unsafe source.withBytes { srcBuffer in
             guard let srcBase = srcBuffer.baseAddress,
                 let dstBase = destination.baseAddress
             else { return }
-            dstBase.advanced(by: offset)
+            unsafe dstBase.advanced(by: offset)
                 .copyMemory(from: srcBase, byteCount: srcBuffer.count)
         }
     }
