@@ -111,17 +111,7 @@ extension Binary.Serializable {
     ) throws(E) -> R {
         var buffer: ContiguousArray<UInt8> = []
         Self.serialize(value, into: &buffer)
-        // Use Result to bridge typed throws across non-typed-throws boundary
-        var result: Result<R, E>!
-        buffer.withUnsafeBufferPointer { bufferPointer in
-            let span = unsafe Span(_unsafeElements: bufferPointer)
-            do throws(E) {
-                result = .success(try body(span))
-            } catch {
-                result = .failure(error)
-            }
-        }
-        return try result.get()
+        return try body(buffer.span)
     }
 
     /// Instance method convenience for zero-copy Span access.
@@ -249,16 +239,8 @@ extension Binary.Serializable where Self: RawRepresentable, Self.RawValue == [UI
         _ value: Self,
         _ body: (borrowing Span<UInt8>) throws(E) -> R
     ) throws(E) -> R {
-        var result: Result<R, E>!
-        value.rawValue.withUnsafeBufferPointer { bufferPointer in
-            let span = unsafe Span(_unsafeElements: bufferPointer)
-            do throws(E) {
-                result = .success(try body(span))
-            } catch {
-                result = .failure(error)
-            }
-        }
-        return try result.get()
+        let bytes = value.rawValue
+        return try body(bytes.span)
     }
 }
 
@@ -270,16 +252,7 @@ extension Binary.Serializable where Self: RawRepresentable, Self.RawValue: Strin
         _ body: (borrowing Span<UInt8>) throws(E) -> R
     ) throws(E) -> R {
         let utf8 = ContiguousArray(value.rawValue.utf8)
-        var result: Result<R, E>!
-        utf8.withUnsafeBufferPointer { bufferPointer in
-            let span = unsafe Span(_unsafeElements: bufferPointer)
-            do throws(E) {
-                result = .success(try body(span))
-            } catch {
-                result = .failure(error)
-            }
-        }
-        return try result.get()
+        return try body(utf8.span)
     }
 }
 
@@ -344,16 +317,7 @@ extension Array: Binary.Serializable where Element == UInt8 {
         _ value: Self,
         _ body: (borrowing Span<UInt8>) throws(E) -> R
     ) throws(E) -> R {
-        var result: Result<R, E>!
-        value.withUnsafeBufferPointer { bufferPointer in
-            let span = unsafe Span(_unsafeElements: bufferPointer)
-            do throws(E) {
-                result = .success(try body(span))
-            } catch {
-                result = .failure(error)
-            }
-        }
-        return try result.get()
+        try body(value.span)
     }
 }
 
@@ -373,16 +337,7 @@ extension ContiguousArray: Binary.Serializable where Element == UInt8 {
         _ value: Self,
         _ body: (borrowing Span<UInt8>) throws(E) -> R
     ) throws(E) -> R {
-        var result: Result<R, E>!
-        value.withUnsafeBufferPointer { bufferPointer in
-            let span = unsafe Span(_unsafeElements: bufferPointer)
-            do throws(E) {
-                result = .success(try body(span))
-            } catch {
-                result = .failure(error)
-            }
-        }
-        return try result.get()
+        try body(value.span)
     }
 }
 

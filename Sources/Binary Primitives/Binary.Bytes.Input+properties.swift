@@ -4,7 +4,7 @@ extension Binary.Bytes.Input {
     internal var totalCount: Int {
         switch unsafe storage {
         case .owned(let bytes): return bytes.count
-        case .borrowed(let buffer): return unsafe buffer.count
+        case .borrowed(let buffer): return buffer.count
         }
     }
 
