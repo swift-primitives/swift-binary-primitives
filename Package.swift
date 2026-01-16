@@ -18,6 +18,7 @@ let package = Package(
         ),
     ],
     dependencies: [
+        .package(path: "../swift-bit-primitives"),
         .package(path: "../swift-dimension-primitives"),
         .package(path: "../swift-formatting-primitives"),
         .package(path: "../swift-parsing-primitives"),
@@ -28,6 +29,7 @@ let package = Package(
         .target(
             name: "Binary Primitives",
             dependencies: [
+                .product(name: "Bit Primitives", package: "swift-bit-primitives"),
                 .product(name: "Dimension Primitives", package: "swift-dimension-primitives"),
                 .product(name: "Formatting Primitives", package: "swift-formatting-primitives"),
                 .product(name: "Parsing Primitives", package: "swift-parsing-primitives"),
