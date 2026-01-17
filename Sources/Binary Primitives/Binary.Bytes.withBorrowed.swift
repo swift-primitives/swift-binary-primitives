@@ -1,6 +1,8 @@
 // Binary.Bytes.withBorrowed.swift
 // Typed-throws trampoline for borrowed contiguous storage.
 
+public import Standard_Library_Extensions
+
 extension Binary.Bytes {
     /// Execute body with borrowed buffer, preserving typed throws.
     ///
@@ -34,18 +36,10 @@ extension Binary.Bytes {
         _ bytes: [UInt8],
         _ body: (inout Binary.Bytes.Input) throws(E) -> T
     ) throws(E) -> T {
-        var r: Result<T, E>?
-        unsafe bytes.withUnsafeBufferPointer { buffer in
+        try unsafe bytes.withUnsafeBufferPointer(body: { buffer throws(E) -> T in
             var input = unsafe Binary.Bytes.Input(borrowing: buffer)
-            do throws(E) {
-                let value = try body(&input)
-                r = .success(value)
-            } catch {
-                r = .failure(error)
-            }
-        }
-        guard let r else { preconditionFailure("withUnsafeBufferPointer did not execute closure") }
-        return try r.get()
+            return try body(&input)
+        })
     }
 
     /// Execute body with borrowed storage from byte collection.
@@ -63,18 +57,11 @@ extension Binary.Bytes {
         _ bytes: Bytes,
         _ body: (inout Binary.Bytes.Input) throws(E) -> T
     ) throws(E) -> T where Bytes: Collection, Bytes.Element == UInt8 {
-        var r: Result<T, E>?
-        _ = bytes.withContiguousStorageIfAvailable { buffer in
+        if let result = try unsafe bytes.withContiguousStorageIfAvailable(body: { buffer throws(E) -> T in
             var input = unsafe Binary.Bytes.Input(borrowing: buffer)
-            do throws(E) {
-                let value = try body(&input)
-                r = .success(value)
-            } catch {
-                r = .failure(error)
-            }
-        }
-        if let r {
-            return try r.get()
+            return try body(&input)
+        }) {
+            return result
         }
         // Fallback: materialize to array
         return try withBorrowed(Array(bytes), body)
@@ -95,18 +82,11 @@ extension Binary.Bytes {
         _ string: some StringProtocol,
         _ body: (inout Binary.Bytes.Input) throws(E) -> T
     ) throws(E) -> T {
-        var r: Result<T, E>?
-        _ = string.utf8.withContiguousStorageIfAvailable { buffer in
+        if let result = try unsafe string.utf8.withContiguousStorageIfAvailable(body: { buffer throws(E) -> T in
             var input = unsafe Binary.Bytes.Input(borrowing: buffer)
-            do throws(E) {
-                let value = try body(&input)
-                r = .success(value)
-            } catch {
-                r = .failure(error)
-            }
-        }
-        if let r {
-            return try r.get()
+            return try body(&input)
+        }) {
+            return result
         }
         // Fallback: materialize to array
         return try withBorrowed(Array(string.utf8), body)
