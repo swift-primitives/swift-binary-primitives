@@ -24,7 +24,6 @@ let package = Package(
         .package(path: "../swift-parsing-primitives"),
         .package(path: "../swift-serialization-primitives"),
         .package(path: "../swift-standard-library-extensions"),
-        .package(path: "../swift-test-primitives"),
     ],
     targets: [
         .target(
@@ -36,13 +35,6 @@ let package = Package(
                 .product(name: "Parsing Primitives", package: "swift-parsing-primitives"),
                 .product(name: "Serialization Primitives", package: "swift-serialization-primitives"),
                 .product(name: "Standard Library Extensions", package: "swift-standard-library-extensions"),
-            ]
-        ),
-        .testTarget(
-            name: "Binary Primitives Tests",
-            dependencies: [
-                "Binary Primitives",
-                .product(name: "Test Primitives", package: "swift-test-primitives"),
             ]
         ),
     ],
