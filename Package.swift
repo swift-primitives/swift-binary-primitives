@@ -16,6 +16,10 @@ let package = Package(
             name: "Binary Primitives",
             targets: ["Binary Primitives"]
         ),
+        .library(
+            name: "Binary Parsing Primitives",
+            targets: ["Binary Parsing Primitives"]
+        ),
     ],
     dependencies: [
         .package(path: "../swift-bit-primitives"),
@@ -27,16 +31,24 @@ let package = Package(
         .package(path: "../swift-standard-library-extensions"),
     ],
     targets: [
+        // Base target: fundamental binary concepts, no Parsing/Machine dependencies
         .target(
             name: "Binary Primitives",
             dependencies: [
                 .product(name: "Bit Primitives", package: "swift-bit-primitives"),
                 .product(name: "Dimension Primitives", package: "swift-dimension-primitives"),
                 .product(name: "Formatting Primitives", package: "swift-formatting-primitives"),
-                .product(name: "Machine Primitives", package: "swift-machine-primitives"),
-                .product(name: "Parsing Primitives", package: "swift-parsing-primitives"),
                 .product(name: "Serialization Primitives", package: "swift-serialization-primitives"),
                 .product(name: "Standard Library Extensions", package: "swift-standard-library-extensions"),
+            ]
+        ),
+        // Parsing target: Machine IR, interpreters, ParserPrinter types
+        .target(
+            name: "Binary Parsing Primitives",
+            dependencies: [
+                "Binary Primitives",
+                .product(name: "Machine Primitives", package: "swift-machine-primitives"),
+                .product(name: "Parsing Primitives", package: "swift-parsing-primitives"),
             ]
         ),
     ],

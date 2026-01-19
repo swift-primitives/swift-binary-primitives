@@ -31,14 +31,14 @@ extension Binary {
     /// ## Example
     ///
     /// ```swift
-    /// // Parsing
-    /// let parser = Binary.LEB128.Unsigned<UInt64>()
-    /// var input = Binary.Bytes.Input([0xE5, 0x8E, 0x26])
-    /// let value = try parser.parse(&input)  // 624485
-    ///
-    /// // Serialization
+    /// // Serialization (this module)
     /// let bytes = [UInt8](leb128: 624485 as UInt32)
     /// // [0xE5, 0x8E, 0x26]
+    ///
+    /// // Parsing (requires Binary Parsing Primitives)
+    /// let parser = Binary.LEB128.Unsigned<UInt64>()
+    /// var input: ArraySlice<UInt8> = [0xE5, 0x8E, 0x26][...]
+    /// let value = try parser.parse(&input)  // 624485
     /// ```
     public enum LEB128 {}
 }

@@ -1,6 +1,6 @@
 extension Binary {
     /// Namespace for bytes-specific types.
     ///
-    /// Contains `Input`, the escapable cursor type for byte parsers.
+    /// Extended by `Binary Parsing Primitives` with `Input` and `Machine` types.
     public enum Bytes {}
 }

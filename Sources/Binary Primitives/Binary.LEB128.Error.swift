@@ -9,11 +9,12 @@ extension Binary.LEB128 {
     /// ## Example
     ///
     /// ```swift
+    /// // With Binary Parsing Primitives
     /// do {
     ///     let parser = Binary.LEB128.Unsigned<UInt8>()
-    ///     var input = Binary.Bytes.Input([0x80, 0x80, 0x01])
+    ///     var input: ArraySlice<UInt8> = [0x80, 0x80, 0x01][...]
     ///     _ = try parser.parse(&input)
-    /// } catch .overflow(let bitWidth) {
+    /// } catch Binary.LEB128.Error.overflow(let bitWidth) {
     ///     print("Value exceeds \(bitWidth) bits")
     /// }
     /// ```
