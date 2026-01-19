@@ -25,6 +25,7 @@ let package = Package(
         .package(path: "../swift-bit-primitives"),
         .package(path: "../swift-dimension-primitives"),
         .package(path: "../swift-formatting-primitives"),
+        .package(path: "../swift-input-primitives"),
         .package(path: "../swift-machine-primitives"),
         .package(path: "../swift-parsing-primitives"),
         .package(path: "../swift-serialization-primitives"),
@@ -47,6 +48,7 @@ let package = Package(
             name: "Binary Parsing Primitives",
             dependencies: [
                 "Binary Primitives",
+                .product(name: "Input Primitives", package: "swift-input-primitives"),
                 .product(name: "Machine Primitives", package: "swift-machine-primitives"),
                 .product(name: "Parsing Primitives", package: "swift-parsing-primitives"),
             ]

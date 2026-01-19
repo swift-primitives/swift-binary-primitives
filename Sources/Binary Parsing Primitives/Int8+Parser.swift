@@ -2,52 +2,40 @@
 //  Int8+Parser.swift
 //  swift-binary-primitives
 //
-//  ParserPrinter for Int8 binary serialization.
-//  Parsing logic delegated to Machine IR for single source of truth.
+//  Binary coder for Int8 serialization.
 //
 
+public import Input_Primitives
+
 extension Int8 {
-    /// A parser that reads a single byte as an `Int8`.
+    /// Returns a coder for reading/writing a single byte as `Int8`.
     ///
     /// Although endianness is irrelevant for single-byte values, the parameter
-    /// is accepted for API consistency with multi-byte integer parsers.
-    ///
-    /// ## Implementation
-    ///
-    /// Parsing is delegated to `Binary.Bytes.Machine` for canonical byte-level operations.
-    /// Printing uses direct byte insertion.
+    /// is accepted for API consistency with multi-byte integer coders.
     ///
     /// ## Example
     ///
     /// ```swift
-    /// var input: ArraySlice<UInt8> = [0xFF, 0x00]
-    /// let parser = Int8.Parser(endianness: .big)
-    /// let value = try parser.parse(&input)
-    /// // value == -1, input == [0x00]
+    /// let coder = Int8.coder(endianness: .big)
+    ///
+    /// // Decode
+    /// let bytes: [UInt8] = [0xFF, 0x00]
+    /// var input = Input.Slice(bytes[...])
+    /// let value = try coder.decodePrefix(&input)
+    /// // value == -1, input has [0x00] remaining
+    ///
+    /// // Encode
+    /// var output: [UInt8] = []
+    /// coder.encodeAppending(-1, to: &output)
+    /// // output == [0xFF]
     /// ```
-    public struct Parser: Parsing.ParserPrinter, Sendable {
-        public typealias Input = ArraySlice<UInt8>
-        public typealias Output = Int8
-        public typealias Failure = Parsing.EndOfInput.Error
-
-        public let endianness: Binary.Endianness
-
-        public init(endianness: Binary.Endianness) {
-            self.endianness = endianness
-        }
-
-        @inlinable
-        public func parse(_ input: inout Input) throws(Failure) -> Int8 {
-            do {
-                return try Binary.Bytes.Machine.i8Parser().parse(&input)
-            } catch {
-                throw error.asEndOfInputError(for: "Int8")
+    @inlinable
+    public static func coder(endianness: Binary.Endianness) -> Binary.Coder<Int8> {
+        Binary.Coder.machine(
+            Binary.Bytes.Machine.i8Parser(),
+            encode: { value, output in
+                output.append(UInt8(bitPattern: value))
             }
-        }
-
-        @inlinable
-        public func print(_ output: Int8, into input: inout Input) {
-            input.insert(UInt8(bitPattern: output), at: input.startIndex)
-        }
+        )
     }
 }

@@ -2,55 +2,39 @@
 //  UInt32+Parser.swift
 //  swift-binary-primitives
 //
-//  ParserPrinter for UInt32 binary serialization.
-//  Parsing logic delegated to Machine IR for single source of truth.
+//  Binary coder for UInt32 serialization.
 //
 
+public import Input_Primitives
+
 extension UInt32 {
-    /// A parser that reads four bytes as a `UInt32`.
-    ///
-    /// ## Implementation
-    ///
-    /// Parsing is delegated to `Binary.Bytes.Machine` for canonical byte-level operations.
-    /// Printing uses direct byte insertion.
+    /// Returns a coder for reading/writing four bytes as `UInt32`.
     ///
     /// ## Example
     ///
     /// ```swift
-    /// var input: ArraySlice<UInt8> = [0x12, 0x34, 0x56, 0x78, 0x00][...]
-    /// let parser = UInt32.Parser(endianness: .big)
-    /// let value = try parser.parse(&input)
-    /// // value == 0x12345678, input == [0x00]
+    /// let coder = UInt32.coder(endianness: .little)
+    ///
+    /// // Decode
+    /// let bytes: [UInt8] = [0x78, 0x56, 0x34, 0x12]
+    /// var input = Input.Slice(bytes[...])
+    /// let value = try coder.decodePrefix(&input)
+    /// // value == 0x12345678
+    ///
+    /// // Encode
+    /// var output: [UInt8] = []
+    /// coder.encodeAppending(0x12345678, to: &output)
+    /// // output == [0x78, 0x56, 0x34, 0x12] (little-endian)
     /// ```
-    public struct Parser: Parsing.ParserPrinter, Sendable {
-        public typealias Input = ArraySlice<UInt8>
-        public typealias Output = UInt32
-        public typealias Failure = Parsing.EndOfInput.Error
-
-        public let endianness: Binary.Endianness
-
-        public init(endianness: Binary.Endianness) {
-            self.endianness = endianness
+    @inlinable
+    public static func coder(endianness: Binary.Endianness) -> Binary.Coder<UInt32> {
+        let parser: Binary.Bytes.Machine.Parser<UInt32> = switch endianness {
+        case .little: Binary.Bytes.Machine.u32leParser()
+        case .big: Binary.Bytes.Machine.u32beParser()
         }
-
-        @inlinable
-        public func parse(_ input: inout Input) throws(Failure) -> UInt32 {
-            do {
-                switch endianness {
-                case .little:
-                    return try Binary.Bytes.Machine.u32leParser().parse(&input)
-                case .big:
-                    return try Binary.Bytes.Machine.u32beParser().parse(&input)
-                }
-            } catch {
-                throw error.asEndOfInputError(for: "UInt32")
-            }
-        }
-
-        @inlinable
-        public func print(_ output: UInt32, into input: inout Input) {
-            let bytes = output.bytes(endianness: endianness)
-            input.insert(contentsOf: bytes, at: input.startIndex)
+        return Binary.Coder.machine(parser) { value, output in
+            let bytes = value.bytes(endianness: endianness)
+            output.append(contentsOf: bytes)
         }
     }
 }

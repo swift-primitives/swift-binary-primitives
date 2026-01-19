@@ -2,55 +2,39 @@
 //  Int64+Parser.swift
 //  swift-binary-primitives
 //
-//  ParserPrinter for Int64 binary serialization.
-//  Parsing logic delegated to Machine IR for single source of truth.
+//  Binary coder for Int64 serialization.
 //
 
+public import Input_Primitives
+
 extension Int64 {
-    /// A parser that reads eight bytes as an `Int64`.
-    ///
-    /// ## Implementation
-    ///
-    /// Parsing is delegated to `Binary.Bytes.Machine` for canonical byte-level operations.
-    /// Printing uses direct byte insertion.
+    /// Returns a coder for reading/writing eight bytes as `Int64`.
     ///
     /// ## Example
     ///
     /// ```swift
-    /// var input: ArraySlice<UInt8> = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE, 0x00][...]
-    /// let parser = Int64.Parser(endianness: .big)
-    /// let value = try parser.parse(&input)
-    /// // value == -2, input == [0x00]
+    /// let coder = Int64.coder(endianness: .big)
+    ///
+    /// // Decode
+    /// let bytes: [UInt8] = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE]
+    /// var input = Input.Slice(bytes[...])
+    /// let value = try coder.decodePrefix(&input)
+    /// // value == -2
+    ///
+    /// // Encode
+    /// var output: [UInt8] = []
+    /// coder.encodeAppending(-2, to: &output)
+    /// // output == [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE] (big-endian)
     /// ```
-    public struct Parser: Parsing.ParserPrinter, Sendable {
-        public typealias Input = ArraySlice<UInt8>
-        public typealias Output = Int64
-        public typealias Failure = Parsing.EndOfInput.Error
-
-        public let endianness: Binary.Endianness
-
-        public init(endianness: Binary.Endianness) {
-            self.endianness = endianness
+    @inlinable
+    public static func coder(endianness: Binary.Endianness) -> Binary.Coder<Int64> {
+        let parser: Binary.Bytes.Machine.Parser<Int64> = switch endianness {
+        case .little: Binary.Bytes.Machine.i64leParser()
+        case .big: Binary.Bytes.Machine.i64beParser()
         }
-
-        @inlinable
-        public func parse(_ input: inout Input) throws(Failure) -> Int64 {
-            do {
-                switch endianness {
-                case .little:
-                    return try Binary.Bytes.Machine.i64leParser().parse(&input)
-                case .big:
-                    return try Binary.Bytes.Machine.i64beParser().parse(&input)
-                }
-            } catch {
-                throw error.asEndOfInputError(for: "Int64")
-            }
-        }
-
-        @inlinable
-        public func print(_ output: Int64, into input: inout Input) {
-            let bytes = output.bytes(endianness: endianness)
-            input.insert(contentsOf: bytes, at: input.startIndex)
+        return Binary.Coder.machine(parser) { value, output in
+            let bytes = value.bytes(endianness: endianness)
+            output.append(contentsOf: bytes)
         }
     }
 }

@@ -67,6 +67,30 @@ extension Binary.Bytes.WithBorrowed {
     ) throws(Binary.Bytes.Machine.Fault) -> (value: Output, count: Int) {
         try Binary.Bytes._withBorrowedPrefix(bytes, parser)
     }
+
+    /// Execute a machine parser requiring all input to be consumed.
+    ///
+    /// This method parses the input and verifies that no bytes remain.
+    /// If any bytes remain after parsing, throws `.expectedEnd`.
+    ///
+    /// - Parameters:
+    ///   - bytes: The bytes to parse.
+    ///   - parser: The parser to execute.
+    /// - Returns: The parsed value.
+    /// - Throws: `Machine.Fault` if parsing fails or input remains.
+    @inlinable
+    public func whole<Output>(
+        _ bytes: [UInt8],
+        _ parser: Binary.Bytes.Machine.Parser<Output>
+    ) throws(Binary.Bytes.Machine.Fault) -> Output {
+        let total = bytes.count
+        let (value, consumed) = try Binary.Bytes._withBorrowedPrefix(bytes, parser)
+        let remaining = total - consumed
+        guard remaining == 0 else {
+            throw Binary.Bytes.Machine.Fault.expectedEnd(remaining: remaining)
+        }
+        return value
+    }
 }
 
 // MARK: - WithBorrowed Contiguous Methods
@@ -98,6 +122,30 @@ extension Binary.Bytes.WithBorrowed {
         _ parser: Binary.Bytes.Machine.Parser<Output>
     ) throws(Binary.Bytes.Machine.Fault) -> (value: Output, count: Int) where C: ~Copyable {
         try Binary.Bytes._withBorrowedPrefixContiguous(source, parser)
+    }
+
+    /// Execute a machine parser on contiguous storage requiring all input to be consumed.
+    ///
+    /// This method parses the input and verifies that no bytes remain.
+    /// If any bytes remain after parsing, throws `.expectedEnd`.
+    ///
+    /// - Parameters:
+    ///   - source: The contiguous storage to parse.
+    ///   - parser: The parser to execute.
+    /// - Returns: The parsed value.
+    /// - Throws: `Machine.Fault` if parsing fails or input remains.
+    @inlinable
+    public func whole<C: Binary.Contiguous, Output>(
+        _ source: borrowing C,
+        _ parser: Binary.Bytes.Machine.Parser<Output>
+    ) throws(Binary.Bytes.Machine.Fault) -> Output where C: ~Copyable {
+        let total = source.bytes.count
+        let (value, consumed) = try Binary.Bytes._withBorrowedPrefixContiguous(source, parser)
+        let remaining = total - consumed
+        guard remaining == 0 else {
+            throw Binary.Bytes.Machine.Fault.expectedEnd(remaining: remaining)
+        }
+        return value
     }
 }
 

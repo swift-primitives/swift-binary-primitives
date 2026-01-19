@@ -1,6 +1,13 @@
-public import Parsing_Primitives
+//
+//  Binary.Bytes.Input+Input.Protocol.swift
+//  swift-binary-primitives
+//
+//  Conformance of Binary.Bytes.Input to Input.Protocol for parsing integration.
+//
 
-extension Binary.Bytes.Input: Parsing.Input {
+public import Input_Primitives
+
+extension Binary.Bytes.Input: Input.`Protocol` {
     public typealias Element = UInt8
     public typealias Checkpoint = Int
 
@@ -28,3 +35,7 @@ extension Binary.Bytes.Input: Parsing.Input {
         self
     }
 }
+
+// MARK: - Random Access
+
+extension Binary.Bytes.Input: Input.Access.Random {}

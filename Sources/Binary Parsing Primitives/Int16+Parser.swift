@@ -2,55 +2,39 @@
 //  Int16+Parser.swift
 //  swift-binary-primitives
 //
-//  ParserPrinter for Int16 binary serialization.
-//  Parsing logic delegated to Machine IR for single source of truth.
+//  Binary coder for Int16 serialization.
 //
 
+public import Input_Primitives
+
 extension Int16 {
-    /// A parser that reads two bytes as an `Int16`.
-    ///
-    /// ## Implementation
-    ///
-    /// Parsing is delegated to `Binary.Bytes.Machine` for canonical byte-level operations.
-    /// Printing uses direct byte insertion.
+    /// Returns a coder for reading/writing two bytes as `Int16`.
     ///
     /// ## Example
     ///
     /// ```swift
-    /// var input: ArraySlice<UInt8> = [0xFF, 0xFE, 0x00][...]
-    /// let parser = Int16.Parser(endianness: .big)
-    /// let value = try parser.parse(&input)
-    /// // value == -2, input == [0x00]
+    /// let coder = Int16.coder(endianness: .big)
+    ///
+    /// // Decode
+    /// let bytes: [UInt8] = [0xFF, 0xFE, 0x00]
+    /// var input = Input.Slice(bytes[...])
+    /// let value = try coder.decodePrefix(&input)
+    /// // value == -2, input has [0x00] remaining
+    ///
+    /// // Encode
+    /// var output: [UInt8] = []
+    /// coder.encodeAppending(-2, to: &output)
+    /// // output == [0xFF, 0xFE] (big-endian)
     /// ```
-    public struct Parser: Parsing.ParserPrinter, Sendable {
-        public typealias Input = ArraySlice<UInt8>
-        public typealias Output = Int16
-        public typealias Failure = Parsing.EndOfInput.Error
-
-        public let endianness: Binary.Endianness
-
-        public init(endianness: Binary.Endianness) {
-            self.endianness = endianness
+    @inlinable
+    public static func coder(endianness: Binary.Endianness) -> Binary.Coder<Int16> {
+        let parser: Binary.Bytes.Machine.Parser<Int16> = switch endianness {
+        case .little: Binary.Bytes.Machine.i16leParser()
+        case .big: Binary.Bytes.Machine.i16beParser()
         }
-
-        @inlinable
-        public func parse(_ input: inout Input) throws(Failure) -> Int16 {
-            do {
-                switch endianness {
-                case .little:
-                    return try Binary.Bytes.Machine.i16leParser().parse(&input)
-                case .big:
-                    return try Binary.Bytes.Machine.i16beParser().parse(&input)
-                }
-            } catch {
-                throw error.asEndOfInputError(for: "Int16")
-            }
-        }
-
-        @inlinable
-        public func print(_ output: Int16, into input: inout Input) {
-            let bytes = output.bytes(endianness: endianness)
-            input.insert(contentsOf: bytes, at: input.startIndex)
+        return Binary.Coder.machine(parser) { value, output in
+            let bytes = value.bytes(endianness: endianness)
+            output.append(contentsOf: bytes)
         }
     }
 }
