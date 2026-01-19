@@ -339,6 +339,45 @@ extension Binary.Bytes.Machine {
     }
 }
 
+// MARK: - Fold
+
+extension Binary.Bytes.Machine {
+    /// Creates an expression that folds zero or more occurrences without allocation.
+    ///
+    /// Unlike `many` which collects into an array, `fold` accumulates incrementally:
+    /// 1. Start with `initial` as accumulator
+    /// 2. Try to parse `child`
+    /// 3. If success: `accumulator = combine(accumulator, childResult)`, repeat
+    /// 4. If failure: return accumulator
+    ///
+    /// ## Example
+    ///
+    /// ```swift
+    /// // Parse decimal digits and fold into integer
+    /// let digit = take1(in: &builder).tryMap({ byte in
+    ///     guard byte >= 0x30 && byte <= 0x39 else { throw .predicateFailed(byte: byte) }
+    ///     return Int(byte - 0x30)
+    /// }, in: &builder)
+    ///
+    /// let number = fold(digit, initial: 0, combine: { acc, d in acc * 10 + d }, in: &builder)
+    /// ```
+    @inlinable
+    public static func fold<T, Acc>(
+        _ expr: Expression<T>,
+        initial: Acc,
+        combine: @escaping (Acc, T) -> Acc,
+        in builder: inout Builder
+    ) -> Expression<Acc> {
+        let node: Node = .fold(
+            child: expr.node,
+            initial: Value.make(initial),
+            combine: Combine.Erased(combine)
+        )
+        let nodeID = builder.allocate(node)
+        return Expression(node: nodeID)
+    }
+}
+
 // MARK: - Optional
 
 extension Binary.Bytes.Machine {

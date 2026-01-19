@@ -2,6 +2,7 @@
 // Zero-copy borrowed parsing APIs with inlined interpreter
 
 public import Machine_Primitives
+public import Serialization_Primitives
 import Standard_Library_Extensions
 //
 // ## Design Note
@@ -22,21 +23,104 @@ import Standard_Library_Extensions
 // Forbidden operations on view inside interpreter:
 // - consumedCount, count, isEmpty, first (computed properties)
 
+// MARK: - WithBorrowed Accessor Type
+
+extension Binary.Bytes {
+    /// Accessor for zero-copy borrowed parsing.
+    @inlinable
+    public static var withBorrowed: WithBorrowed { WithBorrowed() }
+
+    /// Accessor type for borrowed parsing operations.
+    public struct WithBorrowed: Sendable {
+        @inlinable
+        public init() {}
+    }
+}
+
+// MARK: - WithBorrowed Array Methods
+
+extension Binary.Bytes.WithBorrowed {
+    /// Execute a machine parser on borrowed bytes from an array.
+    @inlinable
+    public func callAsFunction<Output>(
+        _ bytes: [UInt8],
+        _ parser: Binary.Bytes.Machine.Parser<Output>
+    ) throws(Binary.Bytes.Machine.Fault) -> Output {
+        try Binary.Bytes._withBorrowedPrefix(bytes, parser).value
+    }
+
+    /// Execute a machine parser, returning value and consumed count.
+    @inlinable
+    public func prefix<Output: Sendable>(
+        _ bytes: [UInt8],
+        _ parser: Binary.Bytes.Machine.Parser<Output>
+    ) throws(Binary.Bytes.Machine.Fault) -> Serialization.Parsing.Prefix.Result<Output> {
+        let r = try Binary.Bytes._withBorrowedPrefix(bytes, parser)
+        return Serialization.Parsing.Prefix.Result(value: r.value, count: r.count)
+    }
+
+    /// Execute a machine parser, returning value and consumed count (unconstrained).
+    @inlinable
+    public func prefixUnchecked<Output>(
+        _ bytes: [UInt8],
+        _ parser: Binary.Bytes.Machine.Parser<Output>
+    ) throws(Binary.Bytes.Machine.Fault) -> (value: Output, count: Int) {
+        try Binary.Bytes._withBorrowedPrefix(bytes, parser)
+    }
+}
+
+// MARK: - WithBorrowed Contiguous Methods
+
+extension Binary.Bytes.WithBorrowed {
+    /// Execute a machine parser on borrowed contiguous storage.
+    @inlinable
+    public func callAsFunction<C: Binary.Contiguous, Output>(
+        _ source: borrowing C,
+        _ parser: Binary.Bytes.Machine.Parser<Output>
+    ) throws(Binary.Bytes.Machine.Fault) -> Output where C: ~Copyable {
+        try Binary.Bytes._withBorrowedPrefixContiguous(source, parser).value
+    }
+
+    /// Execute a machine parser on contiguous storage, returning value and consumed count.
+    @inlinable
+    public func prefix<C: Binary.Contiguous, Output: Sendable>(
+        _ source: borrowing C,
+        _ parser: Binary.Bytes.Machine.Parser<Output>
+    ) throws(Binary.Bytes.Machine.Fault) -> Serialization.Parsing.Prefix.Result<Output> where C: ~Copyable {
+        let r = try Binary.Bytes._withBorrowedPrefixContiguous(source, parser)
+        return Serialization.Parsing.Prefix.Result(value: r.value, count: r.count)
+    }
+
+    /// Execute a machine parser on contiguous storage, returning value and consumed count (unconstrained).
+    @inlinable
+    public func prefixUnchecked<C: Binary.Contiguous, Output>(
+        _ source: borrowing C,
+        _ parser: Binary.Bytes.Machine.Parser<Output>
+    ) throws(Binary.Bytes.Machine.Fault) -> (value: Output, count: Int) where C: ~Copyable {
+        try Binary.Bytes._withBorrowedPrefixContiguous(source, parser)
+    }
+}
+
 // MARK: - Borrowed APIs (Machine-based, canonical)
 
 extension Binary.Bytes {
     /// Execute a machine parser on borrowed bytes from an array.
-    ///
-    /// Zero-copy: the view borrows directly from the array's contiguous storage.
-    /// The machine interpreter runs entirely within this function.
     @inlinable
     public static func withBorrowed<Output>(
         _ bytes: [UInt8],
         _ parser: Machine.Parser<Output>
     ) throws(Machine.Fault) -> Output {
-        try unsafe bytes.withUnsafeBufferPointer { buffer throws(Machine.Fault) in
+        try _withBorrowedPrefix(bytes, parser).value
+    }
+
+    /// Internal engine returning both output and consumed count.
+    @inlinable
+    static func _withBorrowedPrefix<Output>(
+        _ bytes: [UInt8],
+        _ parser: Machine.Parser<Output>
+    ) throws(Machine.Fault) -> (value: Output, count: Int) {
+        try unsafe bytes.withUnsafeBufferPointer { buffer throws(Machine.Fault) -> (value: Output, count: Int) in
             let total = buffer.count
-            // Construct Span explicitly from buffer pointer to give compiler clear scope
             let span = unsafe Span(
                 _unsafeStart: buffer.baseAddress ?? UnsafePointer<UInt8>(bitPattern: 1)!,
                 count: buffer.count
@@ -72,7 +156,7 @@ extension Binary.Bytes {
                     guard let result = value.take(Output.self) else {
                         fatalError("Machine output type mismatch")
                     }
-                    return result
+                    return (value: result, count: consumed)
                 }
 
                 let frame = frames.removeLast()
@@ -103,6 +187,13 @@ extension Binary.Bytes {
                     resultHandles.append(arena.allocate(value))
                     // Use local consumed instead of view.consumedCount
                     frames.append(.many(child: child, savedCheckpoint: consumed, resultHandles: resultHandles, finalize: finalize))
+                    current = child
+                    continue interpreterLoop
+
+                case .fold(let child, _, let accHandle, let combine):
+                    let acc = arena.release(accHandle)
+                    let newAcc = combine.combine(acc, value)
+                    frames.append(.fold(child: child, savedCheckpoint: consumed, accumulatorHandle: arena.allocate(newAcc), combine: combine))
                     current = child
                     continue interpreterLoop
 
@@ -149,6 +240,11 @@ extension Binary.Bytes {
                         results.reserveCapacity(resultHandles.count)
                         for h in resultHandles { results.append(arena.release(h)) }
                         pendingHandle = arena.allocate(finalize.finalize(results))
+                        recovered = true
+                    case .fold(_, let savedCheckpoint, let accHandle, _):
+                        view.position = savedCheckpoint
+                        consumed = savedCheckpoint
+                        pendingHandle = accHandle
                         recovered = true
                     case .optional(let savedCheckpoint, _, let noneHandle):
                         view.position = savedCheckpoint
@@ -485,6 +581,10 @@ extension Binary.Bytes {
                 frames.append(.many(child: child, savedCheckpoint: consumed, resultHandles: [], finalize: finalize))
                 current = child
 
+            case .fold(let child, let initial, let combine):
+                frames.append(.fold(child: child, savedCheckpoint: consumed, accumulatorHandle: arena.allocate(initial), combine: combine))
+                current = child
+
             case .optional(let child, let wrapSome, let noneValue):
                 frames.append(.optional(savedCheckpoint: consumed, wrapSome: wrapSome, noneHandle: arena.allocate(noneValue)))
                 current = child
@@ -511,7 +611,15 @@ extension Binary.Bytes {
         _ source: borrowing C,
         _ parser: Machine.Parser<Output>
     ) throws(Machine.Fault) -> Output where C: ~Copyable {
-        // Get total from source.bytes.count before creating view
+        try _withBorrowedPrefixContiguous(source, parser).value
+    }
+
+    /// Internal engine for contiguous storage returning both output and consumed count.
+    @inlinable
+    static func _withBorrowedPrefixContiguous<C: Binary.Contiguous, Output>(
+        _ source: borrowing C,
+        _ parser: Machine.Parser<Output>
+    ) throws(Machine.Fault) -> (value: Output, count: Int) where C: ~Copyable {
         let sourceBytes = source.bytes
         let total = sourceBytes.count
         var view = Input.View(sourceBytes)
@@ -542,7 +650,7 @@ extension Binary.Bytes {
                     guard let result = value.take(Output.self) else {
                         fatalError("Machine output type mismatch")
                     }
-                    return result
+                    return (value: result, count: consumed)
                 }
 
                 let frame = frames.removeLast()
@@ -572,6 +680,13 @@ extension Binary.Bytes {
                 case .many(let child, _, var resultHandles, let finalize):
                     resultHandles.append(arena.allocate(value))
                     frames.append(.many(child: child, savedCheckpoint: consumed, resultHandles: resultHandles, finalize: finalize))
+                    current = child
+                    continue interpreterLoop
+
+                case .fold(let child, _, let accHandle, let combine):
+                    let acc = arena.release(accHandle)
+                    let newAcc = combine.combine(acc, value)
+                    frames.append(.fold(child: child, savedCheckpoint: consumed, accumulatorHandle: arena.allocate(newAcc), combine: combine))
                     current = child
                     continue interpreterLoop
 
@@ -616,6 +731,11 @@ extension Binary.Bytes {
                         results.reserveCapacity(resultHandles.count)
                         for h in resultHandles { results.append(arena.release(h)) }
                         pendingHandle = arena.allocate(finalize.finalize(results))
+                        recovered = true
+                    case .fold(_, let savedCheckpoint, let accHandle, _):
+                        view.position = savedCheckpoint
+                        consumed = savedCheckpoint
+                        pendingHandle = accHandle
                         recovered = true
                     case .optional(let savedCheckpoint, _, let noneHandle):
                         view.position = savedCheckpoint
@@ -807,6 +927,10 @@ extension Binary.Bytes {
 
             case .many(let child, let finalize):
                 frames.append(.many(child: child, savedCheckpoint: consumed, resultHandles: [], finalize: finalize))
+                current = child
+
+            case .fold(let child, let initial, let combine):
+                frames.append(.fold(child: child, savedCheckpoint: consumed, accumulatorHandle: arena.allocate(initial), combine: combine))
                 current = child
 
             case .optional(let child, let wrapSome, let noneValue):

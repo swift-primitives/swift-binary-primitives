@@ -89,6 +89,13 @@ extension Binary.Bytes.Machine {
                     current = child
                     continue interpreterLoop
 
+                case .fold(let child, _, let accHandle, let combine):
+                    let acc = arena.release(accHandle)
+                    let newAcc = combine.combine(acc, value)
+                    frames.append(.fold(child: child, savedCheckpoint: input.checkpoint, accumulatorHandle: arena.allocate(newAcc), combine: combine))
+                    current = child
+                    continue interpreterLoop
+
                 case .optional(_, let wrapSome, let noneHandle):
                     // Discard none-handle on success to avoid arena leak
                     _ = arena.release(noneHandle)
@@ -127,6 +134,11 @@ extension Binary.Bytes.Machine {
                         results.reserveCapacity(resultHandles.count)
                         for h in resultHandles { results.append(arena.release(h)) }
                         pendingHandle = arena.allocate(finalize.finalize(results))
+                        recovered = true
+
+                    case .fold(_, let savedCheckpoint, let accHandle, _):
+                        input.restore(to: savedCheckpoint)
+                        pendingHandle = accHandle
                         recovered = true
 
                     case .optional(let savedCheckpoint, _, let noneHandle):
@@ -441,6 +453,10 @@ extension Binary.Bytes.Machine {
 
             case .many(let child, let finalize):
                 frames.append(.many(child: child, savedCheckpoint: input.checkpoint, resultHandles: [], finalize: finalize))
+                current = child
+
+            case .fold(let child, let initial, let combine):
+                frames.append(.fold(child: child, savedCheckpoint: input.checkpoint, accumulatorHandle: arena.allocate(initial), combine: combine))
                 current = child
 
             case .optional(let child, let wrapSome, let noneValue):

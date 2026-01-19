@@ -18,6 +18,30 @@ extension Binary.Bytes.Machine {
         mutating func allocate(_ node: Node) -> Node.ID {
             program.allocate(node)
         }
+
+        /// Embeds an existing parser's program into this builder.
+        ///
+        /// Copies all nodes from the source parser, adjusting IDs to fit
+        /// in this builder's program. Returns an expression pointing to
+        /// the copied root node.
+        ///
+        /// Use this to compose existing parsers into new ones:
+        /// ```swift
+        /// let combined = Machine.build { builder in
+        ///     let inner = builder.embed(existingParser)
+        ///     let end = Combinators.end(in: &builder)
+        ///     return Combinators.sequence(inner, end, combine: { v, _ in v }, in: &builder)
+        /// }
+        /// ```
+        @inlinable
+        public mutating func embed<Output>(_ parser: Parser<Output>) -> Expression<Output> {
+            let offset = program.nodes.count
+            for node in parser.program.nodes {
+                _ = program.allocate(node.offset(by: offset))
+            }
+            let adjustedRoot = Node.ID(parser.root.rawValue + offset)
+            return Expression(node: adjustedRoot)
+        }
     }
 
     /// An expression in the machine program, representing a parser that produces Output.
