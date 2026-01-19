@@ -1,0 +1,34 @@
+// Binary.Bytes.Machine.swift
+// Defunctionalized parsing machine for borrowed byte views
+
+extension Binary.Bytes {
+    /// Defunctionalized parsing machine for borrowed byte views.
+    ///
+    /// ## Design Rationale
+    ///
+    /// This machine exists because `Input.View` is `~Escapable`, meaning it cannot
+    /// be passed to closure parameters or protocol witnesses. The machine solves
+    /// this by representing parsers as data (instruction programs) rather than
+    /// callable code.
+    ///
+    /// ## Closed World Constraint
+    ///
+    /// The input cursor (`Input.View`) never crosses an opaque callable boundary.
+    /// All cursor manipulation happens inside the interpreter's `switch` over
+    /// instructions. User extensibility is available on:
+    /// - **Outputs**: via `map`, `tryMap`, `combine`
+    /// - **Byte predicates**: via predicates on `UInt8` (not on `Input.View`)
+    ///
+    /// ## Two Canonical Worlds
+    ///
+    /// | World | Input Type | Machine | Leaf Representation |
+    /// |-------|-----------|---------|---------------------|
+    /// | **Owned** | `Binary.Bytes.Input` | `Parsing.Machine` | Closure `(inout Input) -> Value` |
+    /// | **Borrowed** | `Binary.Bytes.Input.View` | `Binary.Bytes.Machine` | `Instruction` enum |
+    ///
+    /// ## Invariant
+    ///
+    /// Machine closures (transforms, combines) operate on `Value` only and must
+    /// not capture input-bound or lifetime-dependent data.
+    public enum Machine {}
+}

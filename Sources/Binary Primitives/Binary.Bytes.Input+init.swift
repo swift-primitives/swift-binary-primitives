@@ -6,7 +6,7 @@ extension Binary.Bytes.Input {
     /// - Parameter bytes: The bytes to parse.
     @inlinable
     public init<Bytes: Collection>(_ bytes: Bytes) where Bytes.Element == UInt8 {
-        unsafe self.storage = .owned(Array(bytes))
+        self.storage = Array(bytes)
         self.position = 0
     }
 
@@ -15,7 +15,7 @@ extension Binary.Bytes.Input {
     /// - Parameter bytes: The byte array to parse.
     @inlinable
     public init(_ bytes: [UInt8]) {
-        unsafe self.storage = .owned(bytes)
+        self.storage = bytes
         self.position = 0
     }
 
@@ -24,20 +24,7 @@ extension Binary.Bytes.Input {
     /// - Parameter bytes: The byte slice to parse.
     @inlinable
     public init(_ bytes: ArraySlice<UInt8>) {
-        unsafe self.storage = .owned(Array(bytes))
-        self.position = 0
-    }
-
-    /// Creates an input cursor that borrows external buffer storage.
-    ///
-    /// - Warning: The cursor MUST NOT escape the closure scope that owns
-    ///   the buffer pointer. Use only within `withUnsafeBufferPointer` or
-    ///   `withContiguousStorageIfAvailable` closures.
-    ///
-    /// - Parameter buffer: The buffer to borrow.
-    @inlinable
-    public init(borrowing buffer: UnsafeBufferPointer<UInt8>) {
-        unsafe self.storage = .borrowed(buffer)
+        self.storage = Array(bytes)
         self.position = 0
     }
 }

@@ -1,4 +1,21 @@
 // MARK: - Unsafe Byte Access Types
+//
+// ## Pointer Façade Safety Audit (MEM-UNSAFE-002)
+//
+// These façade types hold raw pointers extracted from Span-based storage.
+// Safety is enforced through:
+//
+// 1. **Non-escapable**: `~Copyable, ~Escapable` prevents storage or cross-task transfer
+// 2. **Lifetime-bound**: Computed properties use `@_lifetime(borrow self)` / `@_lifetime(&self)`
+// 3. **Explicit unsafe**: `@unsafe` requires acknowledgment at call site
+//
+// ### Invariant 1: No Transient Source
+// The pointer originates from `bytes`/`mutableBytes` span which is owned by the source.
+// The façade's lifetime is bound to the source via the computed property annotation.
+//
+// ### Invariant 2: No Sendable Escape
+// The façade is `~Escapable` and NOT `Sendable`. The compiler prevents storage
+// and cross-task transfer.
 
 extension Binary {
     /// Accessor for unsafe closure-based read-only byte access.

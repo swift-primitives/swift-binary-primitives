@@ -1,28 +1,24 @@
 extension Binary.Bytes {
-    /// Escapable input cursor for bytes parsing.
+    /// Owned input cursor for bytes parsing.
     ///
-    /// This type provides an escapable cursor over bytes that can be used as
-    /// `Parsing.Parser.Input`. Supports both owned and borrowed storage.
-    ///
-    /// ## Borrowed Storage Safety
-    ///
-    /// When initialized with `init(borrowing:)`, the cursor borrows external storage.
-    /// It MUST NOT escape the closure scope that owns the buffer pointer.
+    /// This type provides an escapable, `Sendable` cursor over bytes that can be
+    /// used as `Parsing.Parser.Input`. Backed by `[UInt8]` with full ownership.
     ///
     /// ## Invariants
     ///
-    /// - `0 <= position <= totalCount`
-    /// - `count == totalCount - position`
+    /// - `0 <= position <= storage.count`
+    /// - `count == storage.count - position`
     /// - `consumedCount == position`
     ///
     /// ## Sendable
     ///
-    /// This type conforms to `Sendable` to satisfy parsing combinator constraints.
-    /// - **Owned inputs** are fully Sendable (backed by `[UInt8]`).
-    /// - **Borrowed inputs** are logically non-sendable and MUST remain within the
-    ///   borrowing closure scope. The `Sendable` conformance exists to satisfy
-    ///   generic combinator requirements; it does NOT relax lifetime rules for
-    ///   borrowed storage.
+    /// Fully `Sendable` because storage is an owned `[UInt8]` value type.
+    /// Safe to transfer across concurrency domains.
+    ///
+    /// ## Borrowed Alternative
+    ///
+    /// For zero-copy parsing over borrowed data, use `Input.View` which stores
+    /// a lifetime-checked `Span<UInt8>` and cannot escape its borrowing scope.
     ///
     /// ## Example
     ///
@@ -42,16 +38,9 @@ extension Binary.Bytes {
     /// }
     /// ```
     @safe
-    public struct Input: @unchecked Sendable {
-        @unsafe
+    public struct Input: Sendable {
         @usableFromInline
-        internal enum Storage {
-            case owned([UInt8])
-            case borrowed(UnsafeBufferPointer<UInt8>)
-        }
-
-        @usableFromInline
-        internal var storage: Storage
+        internal var storage: [UInt8]
 
         @usableFromInline
         internal var position: Int

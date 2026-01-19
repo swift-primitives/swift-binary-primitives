@@ -2,10 +2,7 @@ extension Binary.Bytes.Input {
     /// Total length of the underlying storage.
     @usableFromInline
     internal var totalCount: Int {
-        switch unsafe storage {
-        case .owned(let bytes): return bytes.count
-        case .borrowed(let buffer): return buffer.count
-        }
+        storage.count
     }
 
     /// The number of bytes remaining to parse.
@@ -24,9 +21,6 @@ extension Binary.Bytes.Input {
     @inlinable
     public var first: UInt8? {
         guard position < totalCount else { return nil }
-        switch unsafe storage {
-        case .owned(let bytes): return bytes[position]
-        case .borrowed(let buffer): return unsafe buffer[position]
-        }
+        return storage[position]
     }
 }

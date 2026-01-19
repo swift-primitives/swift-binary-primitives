@@ -7,11 +7,7 @@ extension Binary.Bytes.Input {
     @discardableResult
     public mutating func removeFirst() -> UInt8 {
         precondition(position < totalCount, "removeFirst() called on empty input")
-        let byte: UInt8
-        switch unsafe storage {
-        case .owned(let bytes): byte = bytes[position]
-        case .borrowed(let buffer): byte = unsafe buffer[position]
-        }
+        let byte = storage[position]
         position += 1
         return byte
     }
