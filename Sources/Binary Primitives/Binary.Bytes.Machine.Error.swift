@@ -2,6 +2,7 @@
 // Error types for machine execution
 
 import Machine_Primitives
+import Parsing_Primitives
 
 extension Binary.Bytes.Machine {
     /// Errors that can occur during machine execution.
@@ -29,5 +30,39 @@ extension Binary.Bytes.Machine {
 
         /// No alternatives matched in oneOf.
         case noAlternativesMatched
+    }
+}
+
+// MARK: - Error Bridging
+
+extension Binary.Bytes.Machine.Fault {
+    /// Converts this fault to a `Parsing.EndOfInput.Error` with preserved specificity.
+    ///
+    /// Used by ad-hoc ParserPrinter types that delegate parsing to Machine but
+    /// need to maintain their original error type for API compatibility.
+    ///
+    /// - Parameter typeName: The name of the type being parsed (e.g., "UInt16").
+    /// - Returns: An `EndOfInput.Error` with a descriptive message.
+    @inlinable
+    public func asEndOfInputError(for typeName: String) -> Parsing.EndOfInput.Error {
+        switch self {
+        case .insufficientBytes(let need, let have):
+            return .unexpected(expected: "\(need) bytes for \(typeName), have \(have)")
+        case .unexpectedByte(let expected, let found):
+            let foundStr = found.map { "0x\(String($0, radix: 16))" } ?? "EOF"
+            return .unexpected(expected: "byte 0x\(String(expected, radix: 16)) for \(typeName), found \(foundStr)")
+        case .unexpectedBytes(let expected, _):
+            return .unexpected(expected: "\(expected.count) byte sequence for \(typeName)")
+        case .expectedEnd(let remaining):
+            return .unexpected(expected: "end of input for \(typeName), \(remaining) bytes remain")
+        case .predicateFailed(let byte):
+            return .unexpected(expected: "byte satisfying predicate for \(typeName), got 0x\(String(byte, radix: 16))")
+        case .depthExceeded(let limit):
+            return .unexpected(expected: "recursion within depth \(limit) for \(typeName)")
+        case .leb128Overflow:
+            return .unexpected(expected: "LEB128 value within bit width for \(typeName)")
+        case .noAlternativesMatched:
+            return .unexpected(expected: "one of alternatives to match for \(typeName)")
+        }
     }
 }

@@ -1,14 +1,18 @@
 //
 //  UInt16+Parser.swift
-//  swift-standards
+//  swift-binary-primitives
 //
 //  ParserPrinter for UInt16 binary serialization.
+//  Parsing logic delegated to Machine IR for single source of truth.
 //
 
 extension UInt16 {
     /// A parser that reads two bytes as a `UInt16`.
     ///
-    /// Zero-allocation implementation using manual byte assembly.
+    /// ## Implementation
+    ///
+    /// Parsing is delegated to `Binary.Bytes.Machine` for canonical byte-level operations.
+    /// Printing uses direct byte insertion.
     ///
     /// ## Example
     ///
@@ -31,21 +35,15 @@ extension UInt16 {
 
         @inlinable
         public func parse(_ input: inout Input) throws(Failure) -> UInt16 {
-            let size = 2
-            guard input.count >= size else {
-                throw .unexpected(expected: "\(size) bytes for UInt16")
-            }
-
-            let base = input.startIndex
-            let b0 = input[base]
-            let b1 = input[base + 1]
-            input.removeFirst(size)
-
-            switch endianness {
-            case .little:
-                return UInt16(b0) | (UInt16(b1) << 8)
-            case .big:
-                return (UInt16(b0) << 8) | UInt16(b1)
+            do {
+                switch endianness {
+                case .little:
+                    return try Binary.Bytes.Machine.u16leParser().parse(&input)
+                case .big:
+                    return try Binary.Bytes.Machine.u16beParser().parse(&input)
+                }
+            } catch {
+                throw error.asEndOfInputError(for: "UInt16")
             }
         }
 

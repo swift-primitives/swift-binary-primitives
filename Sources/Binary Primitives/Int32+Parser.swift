@@ -1,15 +1,18 @@
 //
 //  Int32+Parser.swift
-//  swift-standards
+//  swift-binary-primitives
 //
 //  ParserPrinter for Int32 binary serialization.
+//  Parsing logic delegated to Machine IR for single source of truth.
 //
 
 extension Int32 {
     /// A parser that reads four bytes as an `Int32`.
     ///
-    /// Zero-allocation implementation using manual byte assembly.
-    /// Assembles unsigned value first, then converts via `bitPattern`.
+    /// ## Implementation
+    ///
+    /// Parsing is delegated to `Binary.Bytes.Machine` for canonical byte-level operations.
+    /// Printing uses direct byte insertion.
     ///
     /// ## Example
     ///
@@ -32,26 +35,16 @@ extension Int32 {
 
         @inlinable
         public func parse(_ input: inout Input) throws(Failure) -> Int32 {
-            let size = 4
-            guard input.count >= size else {
-                throw .unexpected(expected: "\(size) bytes for Int32")
+            do {
+                switch endianness {
+                case .little:
+                    return try Binary.Bytes.Machine.i32leParser().parse(&input)
+                case .big:
+                    return try Binary.Bytes.Machine.i32beParser().parse(&input)
+                }
+            } catch {
+                throw error.asEndOfInputError(for: "Int32")
             }
-
-            let base = input.startIndex
-            let b0 = input[base]
-            let b1 = input[base + 1]
-            let b2 = input[base + 2]
-            let b3 = input[base + 3]
-            input.removeFirst(size)
-
-            let unsigned: UInt32
-            switch endianness {
-            case .little:
-                unsigned = UInt32(b0) | (UInt32(b1) << 8) | (UInt32(b2) << 16) | (UInt32(b3) << 24)
-            case .big:
-                unsigned = (UInt32(b0) << 24) | (UInt32(b1) << 16) | (UInt32(b2) << 8) | UInt32(b3)
-            }
-            return Int32(bitPattern: unsigned)
         }
 
         @inlinable

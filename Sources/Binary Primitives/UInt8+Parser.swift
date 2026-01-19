@@ -1,8 +1,9 @@
 //
 //  UInt8+Parser.swift
-//  swift-standards
+//  swift-binary-primitives
 //
 //  ParserPrinter for UInt8 binary serialization.
+//  Parsing logic delegated to Machine IR for single source of truth.
 //
 
 extension UInt8 {
@@ -10,6 +11,11 @@ extension UInt8 {
     ///
     /// Although endianness is irrelevant for single-byte values, the parameter
     /// is accepted for API consistency with multi-byte integer parsers.
+    ///
+    /// ## Implementation
+    ///
+    /// Parsing is delegated to `Binary.Bytes.Machine` for canonical byte-level operations.
+    /// Printing uses direct byte insertion.
     ///
     /// ## Example
     ///
@@ -32,11 +38,11 @@ extension UInt8 {
 
         @inlinable
         public func parse(_ input: inout Input) throws(Failure) -> UInt8 {
-            guard let byte = input.first else {
-                throw .unexpected(expected: "1 byte for UInt8")
+            do {
+                return try Binary.Bytes.Machine.u8Parser().parse(&input)
+            } catch {
+                throw error.asEndOfInputError(for: "UInt8")
             }
-            input.removeFirst()
-            return byte
         }
 
         @inlinable

@@ -1,8 +1,9 @@
 //
 //  Int8+Parser.swift
-//  swift-standards
+//  swift-binary-primitives
 //
 //  ParserPrinter for Int8 binary serialization.
+//  Parsing logic delegated to Machine IR for single source of truth.
 //
 
 extension Int8 {
@@ -10,6 +11,11 @@ extension Int8 {
     ///
     /// Although endianness is irrelevant for single-byte values, the parameter
     /// is accepted for API consistency with multi-byte integer parsers.
+    ///
+    /// ## Implementation
+    ///
+    /// Parsing is delegated to `Binary.Bytes.Machine` for canonical byte-level operations.
+    /// Printing uses direct byte insertion.
     ///
     /// ## Example
     ///
@@ -32,11 +38,11 @@ extension Int8 {
 
         @inlinable
         public func parse(_ input: inout Input) throws(Failure) -> Int8 {
-            guard let byte = input.first else {
-                throw .unexpected(expected: "1 byte for Int8")
+            do {
+                return try Binary.Bytes.Machine.i8Parser().parse(&input)
+            } catch {
+                throw error.asEndOfInputError(for: "Int8")
             }
-            input.removeFirst()
-            return Int8(bitPattern: byte)
         }
 
         @inlinable

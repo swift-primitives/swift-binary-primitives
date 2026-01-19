@@ -1,15 +1,18 @@
 //
 //  Int64+Parser.swift
-//  swift-standards
+//  swift-binary-primitives
 //
 //  ParserPrinter for Int64 binary serialization.
+//  Parsing logic delegated to Machine IR for single source of truth.
 //
 
 extension Int64 {
     /// A parser that reads eight bytes as an `Int64`.
     ///
-    /// Zero-allocation implementation using manual byte assembly.
-    /// Assembles unsigned value first, then converts via `bitPattern`.
+    /// ## Implementation
+    ///
+    /// Parsing is delegated to `Binary.Bytes.Machine` for canonical byte-level operations.
+    /// Printing uses direct byte insertion.
     ///
     /// ## Example
     ///
@@ -32,36 +35,16 @@ extension Int64 {
 
         @inlinable
         public func parse(_ input: inout Input) throws(Failure) -> Int64 {
-            let size = 8
-            guard input.count >= size else {
-                throw .unexpected(expected: "\(size) bytes for Int64")
+            do {
+                switch endianness {
+                case .little:
+                    return try Binary.Bytes.Machine.i64leParser().parse(&input)
+                case .big:
+                    return try Binary.Bytes.Machine.i64beParser().parse(&input)
+                }
+            } catch {
+                throw error.asEndOfInputError(for: "Int64")
             }
-
-            let base = input.startIndex
-            let b0 = input[base]
-            let b1 = input[base + 1]
-            let b2 = input[base + 2]
-            let b3 = input[base + 3]
-            let b4 = input[base + 4]
-            let b5 = input[base + 5]
-            let b6 = input[base + 6]
-            let b7 = input[base + 7]
-            input.removeFirst(size)
-
-            let unsigned: UInt64
-            switch endianness {
-            case .little:
-                unsigned =
-                    UInt64(b0) | (UInt64(b1) << 8) | (UInt64(b2) << 16) | (UInt64(b3) << 24)
-                    | (UInt64(b4) << 32) | (UInt64(b5) << 40) | (UInt64(b6) << 48)
-                    | (UInt64(b7) << 56)
-            case .big:
-                unsigned =
-                    (UInt64(b0) << 56) | (UInt64(b1) << 48) | (UInt64(b2) << 40)
-                    | (UInt64(b3) << 32)
-                    | (UInt64(b4) << 24) | (UInt64(b5) << 16) | (UInt64(b6) << 8) | UInt64(b7)
-            }
-            return Int64(bitPattern: unsigned)
         }
 
         @inlinable

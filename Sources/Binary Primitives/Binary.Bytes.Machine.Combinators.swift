@@ -70,6 +70,38 @@ extension Binary.Bytes.Machine {
         return Expression(node: nodeID)
     }
 
+    // MARK: - Unsigned Integer Expressions
+
+    /// Creates an expression for u8.
+    @inlinable
+    public static func u8(
+        in builder: inout Builder
+    ) -> Expression<UInt8> {
+        let node = Node.leaf(.u8)
+        let nodeID = builder.allocate(node)
+        return Expression(node: nodeID)
+    }
+
+    /// Creates an expression for u16 little-endian.
+    @inlinable
+    public static func u16le(
+        in builder: inout Builder
+    ) -> Expression<UInt16> {
+        let node = Node.leaf(.u16le)
+        let nodeID = builder.allocate(node)
+        return Expression(node: nodeID)
+    }
+
+    /// Creates an expression for u16 big-endian.
+    @inlinable
+    public static func u16be(
+        in builder: inout Builder
+    ) -> Expression<UInt16> {
+        let node = Node.leaf(.u16be)
+        let nodeID = builder.allocate(node)
+        return Expression(node: nodeID)
+    }
+
     /// Creates an expression for u32 little-endian.
     @inlinable
     public static func u32le(
@@ -86,6 +118,120 @@ extension Binary.Bytes.Machine {
         in builder: inout Builder
     ) -> Expression<UInt32> {
         let node = Node.leaf(.u32be)
+        let nodeID = builder.allocate(node)
+        return Expression(node: nodeID)
+    }
+
+    /// Creates an expression for u64 little-endian.
+    @inlinable
+    public static func u64le(
+        in builder: inout Builder
+    ) -> Expression<UInt64> {
+        let node = Node.leaf(.u64le)
+        let nodeID = builder.allocate(node)
+        return Expression(node: nodeID)
+    }
+
+    /// Creates an expression for u64 big-endian.
+    @inlinable
+    public static func u64be(
+        in builder: inout Builder
+    ) -> Expression<UInt64> {
+        let node = Node.leaf(.u64be)
+        let nodeID = builder.allocate(node)
+        return Expression(node: nodeID)
+    }
+
+    // MARK: - Signed Integer Expressions
+
+    /// Creates an expression for i8.
+    @inlinable
+    public static func i8(
+        in builder: inout Builder
+    ) -> Expression<Int8> {
+        let node = Node.leaf(.i8)
+        let nodeID = builder.allocate(node)
+        return Expression(node: nodeID)
+    }
+
+    /// Creates an expression for i16 little-endian.
+    @inlinable
+    public static func i16le(
+        in builder: inout Builder
+    ) -> Expression<Int16> {
+        let node = Node.leaf(.i16le)
+        let nodeID = builder.allocate(node)
+        return Expression(node: nodeID)
+    }
+
+    /// Creates an expression for i16 big-endian.
+    @inlinable
+    public static func i16be(
+        in builder: inout Builder
+    ) -> Expression<Int16> {
+        let node = Node.leaf(.i16be)
+        let nodeID = builder.allocate(node)
+        return Expression(node: nodeID)
+    }
+
+    /// Creates an expression for i32 little-endian.
+    @inlinable
+    public static func i32le(
+        in builder: inout Builder
+    ) -> Expression<Int32> {
+        let node = Node.leaf(.i32le)
+        let nodeID = builder.allocate(node)
+        return Expression(node: nodeID)
+    }
+
+    /// Creates an expression for i32 big-endian.
+    @inlinable
+    public static func i32be(
+        in builder: inout Builder
+    ) -> Expression<Int32> {
+        let node = Node.leaf(.i32be)
+        let nodeID = builder.allocate(node)
+        return Expression(node: nodeID)
+    }
+
+    /// Creates an expression for i64 little-endian.
+    @inlinable
+    public static func i64le(
+        in builder: inout Builder
+    ) -> Expression<Int64> {
+        let node = Node.leaf(.i64le)
+        let nodeID = builder.allocate(node)
+        return Expression(node: nodeID)
+    }
+
+    /// Creates an expression for i64 big-endian.
+    @inlinable
+    public static func i64be(
+        in builder: inout Builder
+    ) -> Expression<Int64> {
+        let node = Node.leaf(.i64be)
+        let nodeID = builder.allocate(node)
+        return Expression(node: nodeID)
+    }
+
+    // MARK: - Variable-Length Integer Expressions
+
+    /// Creates an expression for unsigned LEB128.
+    @inlinable
+    public static func uleb128(
+        in builder: inout Builder
+    ) -> Expression<UInt64> {
+        let node = Node.leaf(.uleb128)
+        let nodeID = builder.allocate(node)
+        return Expression(node: nodeID)
+    }
+
+    /// Creates an expression for signed LEB128.
+    @inlinable
+    public static func sleb128(
+        in builder: inout Builder
+    ) -> Expression<Int64> {
+        let node = Node.leaf(.sleb128)
         let nodeID = builder.allocate(node)
         return Expression(node: nodeID)
     }
