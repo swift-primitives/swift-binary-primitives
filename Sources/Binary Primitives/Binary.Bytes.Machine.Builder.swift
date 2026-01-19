@@ -1,6 +1,8 @@
 // Binary.Bytes.Machine.Builder.swift
 // Builder context for constructing machine programs
 
+public import Machine_Primitives
+
 extension Binary.Bytes.Machine {
     /// A builder context for constructing machine programs.
     public struct Builder {

@@ -1,6 +1,7 @@
 // Binary.Bytes.withBorrowed.swift
 // Zero-copy borrowed parsing APIs with inlined interpreter
 
+public import Machine_Primitives
 import Standard_Library_Extensions
 //
 // ## Design Note
@@ -112,6 +113,13 @@ extension Binary.Bytes {
                 case .recursiveExit:
                     depth -= 1
                     pendingHandle = arena.allocate(value)
+
+                case .flatMap(let next):
+                    current = next.next(value)
+                    continue interpreterLoop
+
+                case .extra(let never):
+                    switch never {}
                 }
 
                 if instructionError == nil {
@@ -149,7 +157,7 @@ extension Binary.Bytes {
                         recovered = true
                     case .recursiveExit:
                         depth -= 1
-                    case .map, .tryMap, .sequence:
+                    case .map, .tryMap, .flatMap, .sequence, .extra:
                         continue
                     }
                     if recovered { break }
@@ -457,6 +465,10 @@ extension Binary.Bytes {
                 frames.append(.tryMap(transform: transform))
                 current = child
 
+            case .flatMap(let child, let next):
+                frames.append(.flatMap(next: next))
+                current = child
+
             case .sequence(let a, let b, let combine):
                 frames.append(.sequence(.second(b: b, combine: combine)))
                 current = a
@@ -570,6 +582,13 @@ extension Binary.Bytes {
                 case .recursiveExit:
                     depth -= 1
                     pendingHandle = arena.allocate(value)
+
+                case .flatMap(let next):
+                    current = next.next(value)
+                    continue interpreterLoop
+
+                case .extra(let never):
+                    switch never {}
                 }
 
                 if instructionError == nil {
@@ -605,7 +624,7 @@ extension Binary.Bytes {
                         recovered = true
                     case .recursiveExit:
                         depth -= 1
-                    case .map, .tryMap, .sequence:
+                    case .map, .tryMap, .flatMap, .sequence, .extra:
                         continue
                     }
                     if recovered { break }
@@ -771,6 +790,10 @@ extension Binary.Bytes {
 
             case .tryMap(let child, let transform):
                 frames.append(.tryMap(transform: transform))
+                current = child
+
+            case .flatMap(let child, let next):
+                frames.append(.flatMap(next: next))
                 current = child
 
             case .sequence(let a, let b, let combine):

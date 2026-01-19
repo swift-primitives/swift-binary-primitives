@@ -1,6 +1,8 @@
 // Binary.Bytes.Machine.Error.swift
 // Error types for machine execution
 
+import Machine_Primitives
+
 extension Binary.Bytes.Machine {
     /// Errors that can occur during machine execution.
     public enum Fault: Swift.Error, Sendable, Equatable {

@@ -1,6 +1,8 @@
 // Binary.Bytes.Machine.Instruction.swift
 // Closed-world instruction set for byte parsing
 
+import Machine_Primitives
+
 extension Binary.Bytes.Machine {
     /// A byte parsing instruction that operates on `Input.View`.
     ///
@@ -15,8 +17,7 @@ extension Binary.Bytes.Machine {
     /// - **Predicates on `UInt8`**: Predicates receive a single byte, not the view
     /// - **Transforms on outputs**: Via `map`/`tryMap` on `Value`
     @safe
-    @usableFromInline
-    enum Instruction {
+    public enum Instruction {
         // MARK: - Cursor Operations
 
         /// Consume and return one byte. Fails if input is empty.

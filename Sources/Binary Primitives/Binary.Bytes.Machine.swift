@@ -1,6 +1,8 @@
 // Binary.Bytes.Machine.swift
 // Defunctionalized parsing machine for borrowed byte views
 
+public import Machine_Primitives
+
 extension Binary.Bytes {
     /// Defunctionalized parsing machine for borrowed byte views.
     ///
@@ -31,4 +33,23 @@ extension Binary.Bytes {
     /// Machine closures (transforms, combines) operate on `Value` only and must
     /// not capture input-bound or lifetime-dependent data.
     public enum Machine {}
+}
+
+// MARK: - Core Type Aliases
+
+extension Binary.Bytes.Machine {
+    /// Type-erased value container from Machine Primitives.
+    public typealias Value = Machine_Primitives.Machine.Value
+
+    /// Transform operations from Machine Primitives.
+    public typealias Transform = Machine_Primitives.Machine.Transform
+
+    /// Combine operations from Machine Primitives.
+    public typealias Combine = Machine_Primitives.Machine.Combine
+
+    /// Finalize operations from Machine Primitives.
+    public typealias Finalize = Machine_Primitives.Machine.Finalize
+
+    /// Next-node selection for flatMap from Machine Primitives.
+    public typealias Next = Machine_Primitives.Machine.Next
 }

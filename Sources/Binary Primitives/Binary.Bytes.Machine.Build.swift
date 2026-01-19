@@ -1,6 +1,8 @@
 // Binary.Bytes.Machine.Build.swift
 // Entry points for building machine programs
 
+public import Machine_Primitives
+
 extension Binary.Bytes.Machine {
     /// The final parser type that can be executed on borrowed byte views.
     ///

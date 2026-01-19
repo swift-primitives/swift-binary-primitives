@@ -1,6 +1,8 @@
 // Binary.Bytes.Machine.Combinators.swift
 // Combinator API for building machine programs
 
+public import Machine_Primitives
+
 // MARK: - Instruction Expressions
 
 extension Binary.Bytes.Machine {
