@@ -2,7 +2,7 @@
 // Error types for machine execution
 
 import Machine_Primitives
-import Parsing_Primitives
+import Parser_Primitives
 
 extension Binary.Bytes.Machine {
     /// Errors that can occur during machine execution.
@@ -36,7 +36,7 @@ extension Binary.Bytes.Machine {
 // MARK: - Error Bridging
 
 extension Binary.Bytes.Machine.Fault {
-    /// Converts this fault to a `Parsing.EndOfInput.Error` with preserved specificity.
+    /// Converts this fault to a `Parser.EndOfInput.Error` with preserved specificity.
     ///
     /// Used by ad-hoc ParserPrinter types that delegate parsing to Machine but
     /// need to maintain their original error type for API compatibility.
@@ -44,7 +44,7 @@ extension Binary.Bytes.Machine.Fault {
     /// - Parameter typeName: The name of the type being parsed (e.g., "UInt16").
     /// - Returns: An `EndOfInput.Error` with a descriptive message.
     @inlinable
-    public func asEndOfInputError(for typeName: String) -> Parsing.EndOfInput.Error {
+    public func asEndOfInputError(for typeName: String) -> Parser.EndOfInput.Error {
         switch self {
         case .insufficientBytes(let need, let have):
             return .unexpected(expected: "\(need) bytes for \(typeName), have \(have)")

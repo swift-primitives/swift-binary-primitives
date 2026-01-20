@@ -260,6 +260,36 @@ The explicit `throws(Machine.Fault)` tells the compiler what error type to expec
 
 ---
 
+## Unavoidable Duplication and Its Boundaries
+
+**Date**: 2026-01-19
+
+**Context**: Binary has two nearly-identical interpreter bodies in `withBorrowed.swift`. The natural question: can we have just one?
+
+### The ~Escapable Constraint
+
+Swift 6's borrowed views (`~Escapable` types like `Input.View`) cannot cross function boundaries. The lifetime checker rejects any helper function that takes `inout Input.View`—even "innocent" abstractions like computed properties or nested type methods. This is not a bug; it's the price of zero-copy safety.
+
+The consequence: the entire interpreter loop must live in the same lexical function body as the view creation. Two `withBorrowed` entry points (one for `[UInt8]`, one for `Binary.Contiguous`) means two inlined interpreter copies.
+
+### Acceptable vs. Unacceptable Duplication
+
+The plan's goal was "maximize reuse; the only unavoidable duplication should be borrowed-view interpreter bodies." This is precise. Duplication is acceptable when:
+
+1. It's forced by language constraints (not laziness)
+2. The duplicated code is lockstep identical (not diverging implementations)
+3. Everything that *can* be shared *is* shared
+
+The interpreters differ only in view construction (5-10 lines). The 400+ line interpreter body is textually identical. This is macro-expansion-style duplication: one conceptual implementation, two required instantiations.
+
+### Maintaining Lockstep
+
+The discipline is treating the second interpreter as a forced duplicate, not an independent implementation. Changes must be made to both simultaneously. The ideal future: a build-time code generator or Swift language improvement that eliminates the duplication. Until then, treat them as one.
+
+**Applies to**: `Binary.Bytes.withBorrowed` implementations for `[UInt8]` and `Binary.Contiguous` inputs.
+
+---
+
 ## Topics
 
 ### Related Documents

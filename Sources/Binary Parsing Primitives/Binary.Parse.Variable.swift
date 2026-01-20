@@ -51,12 +51,12 @@ extension Binary.Parse {
     }
 }
 
-// MARK: - Parsing.Parser
+// MARK: - Parser.Parser
 
-extension Binary.Parse.Variable: Parsing.Parser {
+extension Binary.Parse.Variable: Parser.Parser {
     public typealias Input = ArraySlice<UInt8>
     public typealias Output = T
-    public typealias Failure = Parsing.EndOfInput.Error
+    public typealias Failure = Parser.EndOfInput.Error
 
     @inlinable
     public func parse(_ input: inout Input) throws(Failure) -> T {

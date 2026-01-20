@@ -2,13 +2,13 @@
 // Owned executor for Machine programs
 
 public import Machine_Primitives
-public import Parsing_Primitives
+public import Parser_Primitives
 
 extension Binary.Bytes.Machine {
-    /// Executes a Machine program on any byte-oriented Parsing.Input.
+    /// Executes a Machine program on any byte-oriented Parser.Input.
     ///
     /// This is the owned-path executor, complementing the borrowed-path `withBorrowed`.
-    /// Both execute the same IR (Machine.Program); this one operates on any `Parsing.Input`
+    /// Both execute the same IR (Machine.Program); this one operates on any `Parser.Input`
     /// where `Element == UInt8` and `Checkpoint == Int`.
     ///
     /// This generalization allows zero-copy parsing on both `Binary.Bytes.Input` and
@@ -17,11 +17,11 @@ extension Binary.Bytes.Machine {
     /// - Parameters:
     ///   - program: The program to execute.
     ///   - root: The root node ID.
-    ///   - input: The input cursor (any Parsing.Input with UInt8 elements).
+    ///   - input: The input cursor (any Parser.Input with UInt8 elements).
     /// - Returns: The parsed output.
     /// - Throws: `Fault` on parsing failure.
     @usableFromInline
-    static func run<Input: Parsing.Input, Output>(
+    static func run<Input: Parser.Input, Output>(
         program: Program,
         root: Node.ID,
         input: inout Input,
@@ -482,16 +482,16 @@ extension Binary.Bytes.Machine {
 // MARK: - Parser Extension
 
 extension Binary.Bytes.Machine.Parser {
-    /// Executes this parser on any byte-oriented Parsing.Input.
+    /// Executes this parser on any byte-oriented Parser.Input.
     ///
     /// This generic overload allows zero-copy parsing on both `Binary.Bytes.Input` and
     /// `ArraySlice<UInt8>` without conversion overhead.
     ///
-    /// - Parameter input: Any Parsing.Input with UInt8 elements and Int checkpoint.
+    /// - Parameter input: Any Parser.Input with UInt8 elements and Int checkpoint.
     /// - Returns: The parsed output.
     /// - Throws: `Fault` on parsing failure.
     @inlinable
-    public func parse<Input: Parsing.Input>(
+    public func parse<Input: Parser.Input>(
         _ input: inout Input
     ) throws(Binary.Bytes.Machine.Fault) -> Output
     where Input.Element == UInt8, Input.Checkpoint == Int {

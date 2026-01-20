@@ -20,12 +20,12 @@ extension InlineArray where Element: FixedWidthInteger {
     /// - Parameters:
     ///   - input: The binary input to parse from.
     ///   - endianness: Byte order for parsing each element.
-    /// - Throws: `Parsing.EndOfInput.Error` if insufficient bytes remain.
+    /// - Throws: `Parser.EndOfInput.Error` if insufficient bytes remain.
     @inlinable
     public init(
         parsing input: inout ArraySlice<UInt8>,
         endianness: Binary.Endianness
-    ) throws(Parsing.EndOfInput.Error) {
+    ) throws(Parser.EndOfInput.Error) {
         self = Self(repeating: 0)
         let elementSize = MemoryLayout<Element>.size
 

@@ -16,7 +16,7 @@ public import Input_Primitives
 extension Binary {
     /// A witness for bidirectional binary coding with separate input/output types.
     ///
-    /// Unlike `Parsing.ParserPrinter` which requires the same `Input` type for both
+    /// Unlike `Parser.ParserPrinter` which requires the same `Input` type for both
     /// directions, `Coder` uses the appropriate type for each operation:
     /// - Decoding from `Input.Slice<ArraySlice<UInt8>>` (read-only cursor)
     /// - Encoding into `[UInt8]` (mutable buffer)

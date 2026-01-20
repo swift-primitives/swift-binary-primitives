@@ -30,12 +30,12 @@ extension Binary.Parse {
     }
 }
 
-// MARK: - Parsing.Parser
+// MARK: - Parser.Parser
 
-extension Binary.Parse.Inline: Parsing.Parser {
+extension Binary.Parse.Inline: Parser.Parser {
     public typealias Input = ArraySlice<UInt8>
     public typealias Output = InlineArray<Count, Element>
-    public typealias Failure = Parsing.EndOfInput.Error
+    public typealias Failure = Parser.EndOfInput.Error
 
     @inlinable
     public func parse(_ input: inout Input) throws(Failure) -> Output {

@@ -2,7 +2,7 @@ extension Binary.Bytes {
     /// Owned input cursor for bytes parsing.
     ///
     /// This type provides an escapable, `Sendable` cursor over bytes that can be
-    /// used as `Parsing.Parser.Input`. Backed by `[UInt8]` with full ownership.
+    /// used as `Parser.Parser.Input`. Backed by `[UInt8]` with full ownership.
     ///
     /// ## Invariants
     ///
@@ -23,10 +23,10 @@ extension Binary.Bytes {
     /// ## Example
     ///
     /// ```swift
-    /// struct MyParser: Parsing.Parser {
+    /// struct MyParser: Parser.Parser {
     ///     typealias Input = Binary.Bytes.Input
     ///     typealias Output = UInt8
-    ///     typealias Failure = Parsing.Match.Error
+    ///     typealias Failure = Parser.Match.Error
     ///
     ///     func parse(_ input: inout Input) throws(Failure) -> UInt8 {
     ///         guard let byte = input.first else {

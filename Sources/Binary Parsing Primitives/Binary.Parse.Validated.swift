@@ -57,9 +57,9 @@ extension Binary.Parse.Validated {
 
 extension Binary.Parse.Validated.Error: Sendable where T.RawValue: Sendable {}
 
-// MARK: - Parsing.Parser
+// MARK: - Parser.Parser
 
-extension Binary.Parse.Validated: Parsing.Parser {
+extension Binary.Parse.Validated: Parser.Parser {
     public typealias Input = ArraySlice<UInt8>
     public typealias Output = T
     public typealias Failure = Error

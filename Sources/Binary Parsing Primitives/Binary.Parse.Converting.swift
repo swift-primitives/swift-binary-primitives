@@ -53,9 +53,9 @@ extension Binary.Parse.Converting {
 
 extension Binary.Parse.Converting.Error: Sendable where Source: Sendable {}
 
-// MARK: - Parsing.Parser
+// MARK: - Parser.Parser
 
-extension Binary.Parse.Converting: Parsing.Parser {
+extension Binary.Parse.Converting: Parser.Parser {
     public typealias Input = ArraySlice<UInt8>
     public typealias Output = Target
     public typealias Failure = Error

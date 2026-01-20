@@ -1,6 +1,6 @@
-public import Parsing_Primitives
+public import Parser_Primitives
 
-extension Parsing.Parser where Self: Sendable, Input == Binary.Bytes.Input {
+extension Parser.Parser where Self: Sendable, Input == Binary.Bytes.Input {
     /// Accessor for bytes parsing capabilities.
     ///
     /// Provides `parser.parse.whole(bytes)` and `parser.parse.prefix(bytes)` ergonomics.
@@ -8,7 +8,7 @@ extension Parsing.Parser where Self: Sendable, Input == Binary.Bytes.Input {
     /// ## Example
     ///
     /// ```swift
-    /// let parser: some Parsing.Parser<Binary.Bytes.Input, MyType, MyError> = ...
+    /// let parser: some Parser.Parser<Binary.Bytes.Input, MyType, MyError> = ...
     /// let bytes: [UInt8] = [...]
     ///
     /// // Whole-buffer parsing (fails if bytes remain)

@@ -1,4 +1,4 @@
-public import Parsing_Primitives
+public import Parser_Primitives
 
 extension Binary.Parse {
     /// Accessor wrapper providing `parser.parse.whole(bytes)` / `parser.parse.prefix(bytes)` ergonomics.
@@ -12,7 +12,7 @@ extension Binary.Parse {
     /// let value = try parser.parse.whole(bytes)
     /// let result = try parser.parse.prefix(bytes)
     /// ```
-    public struct Access<P: Parsing.Parser & Sendable>: Sendable where P.Input == Binary.Bytes.Input {
+    public struct Access<P: Parser.Parser & Sendable>: Sendable where P.Input == Binary.Bytes.Input {
         @usableFromInline
         internal let parser: P
 

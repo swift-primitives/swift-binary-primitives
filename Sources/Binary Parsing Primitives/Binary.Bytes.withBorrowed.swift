@@ -54,9 +54,9 @@ extension Binary.Bytes.WithBorrowed {
     public func prefix<Output: Sendable>(
         _ bytes: [UInt8],
         _ parser: Binary.Bytes.Machine.Parser<Output>
-    ) throws(Binary.Bytes.Machine.Fault) -> Serialization.Parsing.Prefix.Result<Output> {
+    ) throws(Binary.Bytes.Machine.Fault) -> Serialization.Parser.Prefix.Result<Output> {
         let r = try Binary.Bytes._withBorrowedPrefix(bytes, parser)
-        return Serialization.Parsing.Prefix.Result(value: r.value, count: r.count)
+        return Serialization.Parser.Prefix.Result(value: r.value, count: r.count)
     }
 
     /// Execute a machine parser, returning value and consumed count (unconstrained).
@@ -110,9 +110,9 @@ extension Binary.Bytes.WithBorrowed {
     public func prefix<C: Binary.Contiguous, Output: Sendable>(
         _ source: borrowing C,
         _ parser: Binary.Bytes.Machine.Parser<Output>
-    ) throws(Binary.Bytes.Machine.Fault) -> Serialization.Parsing.Prefix.Result<Output> where C: ~Copyable {
+    ) throws(Binary.Bytes.Machine.Fault) -> Serialization.Parser.Prefix.Result<Output> where C: ~Copyable {
         let r = try Binary.Bytes._withBorrowedPrefixContiguous(source, parser)
-        return Serialization.Parsing.Prefix.Result(value: r.value, count: r.count)
+        return Serialization.Parser.Prefix.Result(value: r.value, count: r.count)
     }
 
     /// Execute a machine parser on contiguous storage, returning value and consumed count (unconstrained).

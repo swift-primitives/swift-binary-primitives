@@ -1,4 +1,4 @@
-public import Parsing_Primitives
+public import Parser_Primitives
 public import Serialization_Primitives
 
 extension Binary.Parse.Access {
@@ -10,10 +10,10 @@ extension Binary.Parse.Access {
     @inlinable
     public func prefix<Bytes: Collection>(
         _ bytes: Bytes
-    ) throws(P.Failure) -> Serialization.Parsing.Prefix.Result<P.Output>
+    ) throws(P.Failure) -> Serialization.Parser.Prefix.Result<P.Output>
     where Bytes.Element == UInt8 {
         var input = Binary.Bytes.Input(bytes)
         let value = try parser.parse(&input)
-        return Serialization.Parsing.Prefix.Result(value: value, count: input.consumedCount)
+        return Serialization.Parser.Prefix.Result(value: value, count: input.consumedCount)
     }
 }

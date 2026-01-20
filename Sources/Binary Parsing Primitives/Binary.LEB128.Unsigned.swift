@@ -31,9 +31,9 @@ extension Binary.LEB128 {
     }
 }
 
-// MARK: - Parsing.Parser
+// MARK: - Parser.Parser
 
-extension Binary.LEB128.Unsigned: Parsing.Parser {
+extension Binary.LEB128.Unsigned: Parser.Parser {
     public typealias Input = ArraySlice<UInt8>
     public typealias Output = T
     public typealias Failure = Binary.LEB128.Error
