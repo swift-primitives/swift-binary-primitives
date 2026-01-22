@@ -23,7 +23,7 @@ public func & <Tag, RawValue: FixedWidthInteger>(
     lhs: Tagged<Tag, RawValue>,
     rhs: Tagged<Tag, RawValue>
 ) -> Tagged<Tag, RawValue> {
-    Tagged(lhs.rawValue & rhs.rawValue)
+    Tagged(__unchecked: (), lhs.rawValue & rhs.rawValue)
 }
 
 /// Bitwise AND of a tagged value with a raw integer literal.
@@ -32,7 +32,7 @@ public func & <Tag, RawValue: FixedWidthInteger>(
     lhs: Tagged<Tag, RawValue>,
     rhs: RawValue
 ) -> Tagged<Tag, RawValue> {
-    Tagged(lhs.rawValue & rhs)
+    Tagged(__unchecked: (), lhs.rawValue & rhs)
 }
 
 /// Bitwise AND of a raw integer literal with a tagged value.
@@ -41,7 +41,7 @@ public func & <Tag, RawValue: FixedWidthInteger>(
     lhs: RawValue,
     rhs: Tagged<Tag, RawValue>
 ) -> Tagged<Tag, RawValue> {
-    Tagged(lhs & rhs.rawValue)
+    Tagged(__unchecked: (), lhs & rhs.rawValue)
 }
 
 // MARK: - Bitwise OR
@@ -52,7 +52,7 @@ public func | <Tag, RawValue: FixedWidthInteger>(
     lhs: Tagged<Tag, RawValue>,
     rhs: Tagged<Tag, RawValue>
 ) -> Tagged<Tag, RawValue> {
-    Tagged(lhs.rawValue | rhs.rawValue)
+    Tagged(__unchecked: (), lhs.rawValue | rhs.rawValue)
 }
 
 /// Bitwise OR of a tagged value with a raw integer literal.
@@ -61,7 +61,7 @@ public func | <Tag, RawValue: FixedWidthInteger>(
     lhs: Tagged<Tag, RawValue>,
     rhs: RawValue
 ) -> Tagged<Tag, RawValue> {
-    Tagged(lhs.rawValue | rhs)
+    Tagged(__unchecked: (), lhs.rawValue | rhs)
 }
 
 /// Bitwise OR of a raw integer literal with a tagged value.
@@ -70,7 +70,7 @@ public func | <Tag, RawValue: FixedWidthInteger>(
     lhs: RawValue,
     rhs: Tagged<Tag, RawValue>
 ) -> Tagged<Tag, RawValue> {
-    Tagged(lhs | rhs.rawValue)
+    Tagged(__unchecked: (), lhs | rhs.rawValue)
 }
 
 // MARK: - Bitwise XOR
@@ -81,7 +81,7 @@ public func ^ <Tag, RawValue: FixedWidthInteger>(
     lhs: Tagged<Tag, RawValue>,
     rhs: Tagged<Tag, RawValue>
 ) -> Tagged<Tag, RawValue> {
-    Tagged(lhs.rawValue ^ rhs.rawValue)
+    Tagged(__unchecked: (), lhs.rawValue ^ rhs.rawValue)
 }
 
 /// Bitwise XOR of a tagged value with a raw integer literal.
@@ -90,7 +90,7 @@ public func ^ <Tag, RawValue: FixedWidthInteger>(
     lhs: Tagged<Tag, RawValue>,
     rhs: RawValue
 ) -> Tagged<Tag, RawValue> {
-    Tagged(lhs.rawValue ^ rhs)
+    Tagged(__unchecked: (), lhs.rawValue ^ rhs)
 }
 
 /// Bitwise XOR of a raw integer literal with a tagged value.
@@ -99,7 +99,7 @@ public func ^ <Tag, RawValue: FixedWidthInteger>(
     lhs: RawValue,
     rhs: Tagged<Tag, RawValue>
 ) -> Tagged<Tag, RawValue> {
-    Tagged(lhs ^ rhs.rawValue)
+    Tagged(__unchecked: (), lhs ^ rhs.rawValue)
 }
 
 // MARK: - Bitwise NOT
@@ -109,7 +109,7 @@ public func ^ <Tag, RawValue: FixedWidthInteger>(
 public prefix func ~ <Tag, RawValue: FixedWidthInteger>(
     value: Tagged<Tag, RawValue>
 ) -> Tagged<Tag, RawValue> {
-    Tagged(~value.rawValue)
+    Tagged(__unchecked: (), ~value.rawValue)
 }
 
 // MARK: - Left Shift
@@ -120,7 +120,7 @@ public func << <Tag, RawValue: FixedWidthInteger>(
     lhs: Tagged<Tag, RawValue>,
     rhs: Int
 ) -> Tagged<Tag, RawValue> {
-    Tagged(lhs.rawValue << rhs)
+    Tagged(__unchecked: (), lhs.rawValue << rhs)
 }
 
 /// Left shift a tagged value by a tagged shift amount.
@@ -129,7 +129,7 @@ public func << <Tag, RawValue: FixedWidthInteger, ShiftTag>(
     lhs: Tagged<Tag, RawValue>,
     rhs: Tagged<ShiftTag, Int>
 ) -> Tagged<Tag, RawValue> {
-    Tagged(lhs.rawValue << rhs.rawValue)
+    Tagged(__unchecked: (), lhs.rawValue << rhs.rawValue)
 }
 
 // MARK: - Right Shift
@@ -140,7 +140,7 @@ public func >> <Tag, RawValue: FixedWidthInteger>(
     lhs: Tagged<Tag, RawValue>,
     rhs: Int
 ) -> Tagged<Tag, RawValue> {
-    Tagged(lhs.rawValue >> rhs)
+    Tagged(__unchecked: (), lhs.rawValue >> rhs)
 }
 
 /// Right shift a tagged value by a tagged shift amount.
@@ -149,7 +149,7 @@ public func >> <Tag, RawValue: FixedWidthInteger, ShiftTag>(
     lhs: Tagged<Tag, RawValue>,
     rhs: Tagged<ShiftTag, Int>
 ) -> Tagged<Tag, RawValue> {
-    Tagged(lhs.rawValue >> rhs.rawValue)
+    Tagged(__unchecked: (), lhs.rawValue >> rhs.rawValue)
 }
 
 // MARK: - Compound Assignment

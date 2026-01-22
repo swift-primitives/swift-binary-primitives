@@ -286,16 +286,16 @@ extension Tagged: Binary.Serializable where RawValue: Binary.Serializable {
         _ value: Self,
         into buffer: inout Buffer
     ) where Buffer.Element == UInt8 {
-        RawValue.serialize(value._storage, into: &buffer)
+        RawValue.serialize(value.rawValue, into: &buffer)
     }
 
     /// Delegates to raw value's withSerializedBytes for optimal performance.
 
-    public static func withSerializedBytes<R, E: Error>(
+    public static func withSerializedBytes<R, E: Swift.Error>(
         _ value: Self,
         _ body: (borrowing Span<UInt8>) throws(E) -> R
     ) throws(E) -> R {
-        try RawValue.withSerializedBytes(value._storage, body)
+        try RawValue.withSerializedBytes(value.rawValue, body)
     }
 }
 

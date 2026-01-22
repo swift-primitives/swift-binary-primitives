@@ -63,3 +63,15 @@ extension Binary.Space {
     /// Offset in this space.
     public typealias Offset<Scalar: BinaryInteger> = Binary.Offset<Scalar, Binary.Space>
 }
+
+// MARK: - Binary Position Init
+
+extension Tagged where RawValue: BinaryInteger {
+    /// Creates a position from a raw scalar value.
+    ///
+    /// Binary positions are unconstrained - any scalar value is valid.
+    @inlinable
+    package init(_ rawValue: RawValue) {
+        self.init(__unchecked: (), rawValue)
+    }
+}

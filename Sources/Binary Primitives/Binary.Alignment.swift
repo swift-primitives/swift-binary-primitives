@@ -186,7 +186,7 @@ extension Binary.Alignment {
         _ value: Binary.Position<Scalar, Space>
     ) -> Bool {
         let mask: Scalar = shift.mask()
-        return value._storage & mask == 0
+        return value.rawValue & mask == 0
     }
 
     /// Rounds a typed position up to the nearest alignment boundary.
@@ -199,7 +199,7 @@ extension Binary.Alignment {
         _ value: Binary.Position<Scalar, Space>
     ) -> Binary.Position<Scalar, Space> {
         let mask: Scalar = shift.mask()
-        return Binary.Position((value._storage &+ mask) & ~mask)
+        return Binary.Position((value.rawValue &+ mask) & ~mask)
     }
 
     /// Rounds a typed position down to the nearest alignment boundary.
@@ -212,7 +212,7 @@ extension Binary.Alignment {
         _ value: Binary.Position<Scalar, Space>
     ) -> Binary.Position<Scalar, Space> {
         let mask: Scalar = shift.mask()
-        return Binary.Position(value._storage & ~mask)
+        return Binary.Position(value.rawValue & ~mask)
     }
 }
 
@@ -230,7 +230,7 @@ extension Binary.Alignment {
             throw .shiftExceedsBitWidth(shift: shift.rawValue, bitWidth: Scalar.bitWidth)
         }
         let mask: Scalar = shift.mask()
-        return value._storage & mask == 0
+        return value.rawValue & mask == 0
     }
 
     /// Rounds a typed position up, with shift validation.
@@ -244,7 +244,7 @@ extension Binary.Alignment {
             throw .shiftExceedsBitWidth(shift: shift.rawValue, bitWidth: Scalar.bitWidth)
         }
         let mask: Scalar = shift.mask()
-        return Binary.Position((value._storage &+ mask) & ~mask)
+        return Binary.Position((value.rawValue &+ mask) & ~mask)
     }
 
     /// Rounds a typed position down, with shift validation.
@@ -258,7 +258,7 @@ extension Binary.Alignment {
             throw .shiftExceedsBitWidth(shift: shift.rawValue, bitWidth: Scalar.bitWidth)
         }
         let mask: Scalar = shift.mask()
-        return Binary.Position(value._storage & ~mask)
+        return Binary.Position(value.rawValue & ~mask)
     }
 }
 

@@ -95,15 +95,15 @@ extension Binary.Reader {
             throw .overflow(.init(operation: .conversion, field: .count))
         }
 
-        guard readerIndex._storage >= 0 else {
-            throw .negative(.init(field: .reader, value: readerIndex._storage))
+        guard readerIndex.rawValue >= 0 else {
+            throw .negative(.init(field: .reader, value: readerIndex.rawValue))
         }
 
-        guard readerIndex._storage <= count else {
+        guard readerIndex.rawValue <= count else {
             throw .bounds(
                 .init(
                     field: .reader,
-                    value: readerIndex._storage,
+                    value: readerIndex.rawValue,
                     lower: Storage.Scalar(0),
                     upper: count
                 )
@@ -138,8 +138,8 @@ extension Binary.Reader {
     ) {
         let count = Storage.Scalar(exactly: storage.count)
         precondition(count != nil, "storage.count exceeds Scalar range")
-        precondition(readerIndex._storage >= 0)
-        precondition(readerIndex._storage <= count!)
+        precondition(readerIndex.rawValue >= 0)
+        precondition(readerIndex.rawValue <= count!)
         self.storage = storage
         self._count = count!
         self._readerIndex = readerIndex
@@ -153,19 +153,19 @@ extension Binary.Reader {
 
     public var remainingCount: Binary.Count<Storage.Scalar, Storage.Space> {
         // Safe: invariant guarantees count >= reader
-        Binary.Count(unchecked: _count - _readerIndex._storage)
+        Binary.Count(unchecked: _count - _readerIndex.rawValue)
     }
 
     /// Whether there are bytes remaining to read.
 
     public var hasRemaining: Bool {
-        _count > _readerIndex._storage
+        _count > _readerIndex.rawValue
     }
 
     /// Whether the reader has consumed all bytes.
 
     public var isAtEnd: Bool {
-        _readerIndex._storage >= _count
+        _readerIndex.rawValue >= _count
     }
 }
 
@@ -180,7 +180,7 @@ extension Binary.Reader {
     public mutating func moveReaderIndex(
         by offset: Binary.Offset<Storage.Scalar, Storage.Space>
     ) throws(Binary.Error) {
-        let (newIndex, overflow) = _readerIndex._storage.addingReportingOverflow(offset._storage)
+        let (newIndex, overflow) = _readerIndex.rawValue.addingReportingOverflow(offset.rawValue)
 
         guard !overflow else {
             throw .overflow(.init(operation: .addition, field: .reader))
@@ -223,7 +223,7 @@ extension Binary.Reader {
         __unchecked: Void = (),
         by offset: Binary.Offset<Storage.Scalar, Storage.Space>
     ) {
-        let (newIndex, overflow) = _readerIndex._storage.addingReportingOverflow(offset._storage)
+        let (newIndex, overflow) = _readerIndex.rawValue.addingReportingOverflow(offset.rawValue)
         precondition(!overflow, "readerIndex arithmetic overflow")
         precondition(newIndex >= 0 && newIndex <= _count)
         _readerIndex = Binary.Position(newIndex)
@@ -241,15 +241,15 @@ extension Binary.Reader {
     public mutating func setReaderIndex(
         to position: Binary.Position<Storage.Scalar, Storage.Space>
     ) throws(Binary.Error) {
-        guard position._storage >= 0 else {
-            throw .negative(.init(field: .reader, value: position._storage))
+        guard position.rawValue >= 0 else {
+            throw .negative(.init(field: .reader, value: position.rawValue))
         }
 
-        guard position._storage <= _count else {
+        guard position.rawValue <= _count else {
             throw .bounds(
                 .init(
                     field: .reader,
-                    value: position._storage,
+                    value: position.rawValue,
                     lower: Storage.Scalar(0),
                     upper: _count
                 )
@@ -270,8 +270,8 @@ extension Binary.Reader {
         __unchecked: Void = (),
         to position: Binary.Position<Storage.Scalar, Storage.Space>
     ) {
-        precondition(position._storage >= 0)
-        precondition(position._storage <= _count)
+        precondition(position.rawValue >= 0)
+        precondition(position.rawValue <= _count)
         _readerIndex = position
     }
 }
@@ -297,7 +297,7 @@ extension Binary.Reader {
     public func withRemainingBytes<R, E: Swift.Error>(
         _ body: (UnsafeRawBufferPointer) throws(E) -> R
     ) throws(E) -> R {
-        let readerIdx = Int(_readerIndex._storage)
+        let readerIdx = Int(_readerIndex.rawValue)
         let storageCount = Int(_count)
         return try unsafe storage.withBytes(in: readerIdx..<storageCount, body)
     }

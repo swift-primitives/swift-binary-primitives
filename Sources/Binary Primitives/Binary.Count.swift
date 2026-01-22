@@ -71,10 +71,10 @@ extension Binary.Count {
     /// - Throws: `Binary.Error.negative` if value < 0.
 
     public init(_ extent: Extent.X<Space>.Value<Scalar>) throws(Binary.Error) {
-        guard extent._storage >= 0 else {
-            throw .negative(.init(field: .count, value: extent._storage))
+        guard extent.rawValue >= 0 else {
+            throw .negative(.init(field: .count, value: extent.rawValue))
         }
-        self._storage = extent._storage
+        self._storage = extent.rawValue
     }
 }
 
