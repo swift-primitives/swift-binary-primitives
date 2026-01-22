@@ -54,7 +54,7 @@ extension [UInt8] {
     ///   - values: Collection of integers to serialize
     ///   - endianness: Byte order for the output (defaults to little-endian)
     @inlinable
-    public init<C: Collection>(serializing values: C, endianness: Binary.Endianness = .little)
+    public init<C: Swift.Collection>(serializing values: C, endianness: Binary.Endianness = .little)
     where C.Element: FixedWidthInteger {
         var result: [UInt8] = []
         result.reserveCapacity(values.count * MemoryLayout<C.Element>.size)

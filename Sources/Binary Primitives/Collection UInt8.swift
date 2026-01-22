@@ -3,7 +3,7 @@
 
 // MARK: - Byte Collection Trimming
 
-extension Collection<UInt8> {
+extension Swift.Collection<UInt8> {
     /// Trims bytes from both ends of a collection matching a predicate.
     ///
     /// Returns a zero-copy view of the original collection with matching bytes
@@ -23,7 +23,7 @@ extension Collection<UInt8> {
     ///   - predicate: Returns `true` for bytes to remove
     /// - Returns: A subsequence with matching bytes trimmed from both ends
     @inlinable
-    public static func trimming<C: Collection>(
+    public static func trimming<C: Swift.Collection>(
         _ bytes: C,
         where predicate: (UInt8) -> Bool
     ) -> C.SubSequence where C.Element == UInt8 {
@@ -61,7 +61,7 @@ extension Collection<UInt8> {
     ///   - byteSet: The set of bytes to remove
     /// - Returns: A subsequence with the specified bytes trimmed from both ends
     @inlinable
-    public static func trimming<C: Collection>(
+    public static func trimming<C: Swift.Collection>(
         _ bytes: C,
         of byteSet: Set<UInt8>
     ) -> C.SubSequence where C.Element == UInt8 {
@@ -89,7 +89,7 @@ extension Collection<UInt8> {
 
 // MARK: - Byte Subsequence Search
 
-extension Collection<UInt8> {
+extension Swift.Collection<UInt8> {
     /// Finds the first occurrence of a byte subsequence.
     ///
     /// - Parameters:
@@ -97,7 +97,7 @@ extension Collection<UInt8> {
     ///   - needle: The byte sequence to search for
     /// - Returns: Index of the first occurrence, or `nil` if not found
     @inlinable
-    public static func firstIndex<Haystack: Collection, C: Collection>(
+    public static func firstIndex<Haystack: Swift.Collection, C: Swift.Collection>(
         of needle: C,
         in haystack: Haystack
     ) -> Haystack.Index?
@@ -136,7 +136,7 @@ extension Collection<UInt8> {
     /// - Parameter needle: The byte sequence to search for
     /// - Returns: Index of the first occurrence, or `nil` if not found
     @inlinable
-    public func firstIndex<C: Collection>(of needle: C) -> Index?
+    public func firstIndex<C: Swift.Collection>(of needle: C) -> Index?
     where C.Element == UInt8 {
         Self.firstIndex(of: needle, in: self)
     }
@@ -148,7 +148,7 @@ extension Collection<UInt8> {
     ///   - needle: The byte sequence to search for
     /// - Returns: Index of the last occurrence, or `nil` if not found
     @inlinable
-    public static func lastIndex<Haystack: Collection, C: Collection>(
+    public static func lastIndex<Haystack: Swift.Collection, C: Swift.Collection>(
         of needle: C,
         in haystack: Haystack
     ) -> Haystack.Index?
@@ -173,7 +173,7 @@ extension Collection<UInt8> {
     /// - Parameter needle: The byte sequence to search for
     /// - Returns: Index of the last occurrence, or `nil` if not found
     @inlinable
-    public func lastIndex<C: Collection>(of needle: C) -> Index?
+    public func lastIndex<C: Swift.Collection>(of needle: C) -> Index?
     where C.Element == UInt8 {
         Self.lastIndex(of: needle, in: self)
     }
@@ -185,7 +185,7 @@ extension Collection<UInt8> {
     ///   - needle: The byte sequence to search for
     /// - Returns: `true` if the subsequence is found, `false` otherwise
     @inlinable
-    public static func contains<Haystack: Collection, C: Collection>(
+    public static func contains<Haystack: Swift.Collection, C: Swift.Collection>(
         _ needle: C,
         in haystack: Haystack
     ) -> Bool
@@ -198,7 +198,7 @@ extension Collection<UInt8> {
     /// - Parameter needle: The byte sequence to search for
     /// - Returns: `true` if the subsequence is found, `false` otherwise
     @inlinable
-    public func contains<C: Collection>(_ needle: C) -> Bool
+    public func contains<C: Swift.Collection>(_ needle: C) -> Bool
     where C.Element == UInt8 {
         Self.contains(needle, in: self)
     }

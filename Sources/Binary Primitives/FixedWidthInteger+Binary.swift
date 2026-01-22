@@ -268,7 +268,7 @@ extension Array where Element: FixedWidthInteger {
     ///   - bytes: Collection of bytes representing multiple integers
     ///   - endianness: Byte order of the input (defaults to little-endian)
     @inlinable
-    public init?<C: Collection>(bytes: C, endianness: Binary.Endianness = .little)
+    public init?<C: Swift.Collection>(bytes: C, endianness: Binary.Endianness = .little)
     where C.Element == UInt8 {
         let elementSize = MemoryLayout<Element>.size
         guard bytes.count % elementSize == 0 else { return nil }
