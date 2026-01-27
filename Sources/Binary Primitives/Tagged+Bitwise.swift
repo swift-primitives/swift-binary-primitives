@@ -109,7 +109,7 @@ public func ^ <Tag, RawValue: FixedWidthInteger>(
 public prefix func ~ <Tag, RawValue: FixedWidthInteger>(
     value: Tagged<Tag, RawValue>
 ) -> Tagged<Tag, RawValue> {
-    Tagged(__unchecked: (), ~value.rawValue)
+    value.map { ~$0 }
 }
 
 // MARK: - Left Shift
