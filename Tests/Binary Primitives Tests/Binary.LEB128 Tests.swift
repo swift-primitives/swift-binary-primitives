@@ -7,11 +7,25 @@
 import Testing
 
 @testable import Binary_Primitives
+import Binary_Primitives_Test_Support
 
-// MARK: - Serialization Tests
+// MARK: - Test Suites
 
-@Suite("Binary.LEB128.Serialize")
-struct LEB128SerializeTests {
+/// Tests for Binary.LEB128 - uses parallel namespace pattern per [TEST-004]
+/// since Binary.LEB128 is a namespace enum.
+@Suite("Binary.LEB128")
+struct BinaryLEB128Tests {
+    @Suite struct Unit {}
+    @Suite struct EdgeCase {}
+    @Suite struct Integration {}
+    @Suite(.serialized) struct Performance {}
+}
+
+// MARK: - Unit Tests
+
+extension BinaryLEB128Tests.Unit {
+
+    // MARK: - Unsigned Serialization
 
     @Test
     func `serialize unsigned single byte`() {
@@ -26,6 +40,8 @@ struct LEB128SerializeTests {
         #expect([UInt8](leb128: 624485 as UInt32) == [0xE5, 0x8E, 0x26])
         #expect([UInt8](leb128: 300 as UInt32) == [0xAC, 0x02])
     }
+
+    // MARK: - Signed Serialization
 
     @Test
     func `serialize signed positive`() {
@@ -43,10 +59,9 @@ struct LEB128SerializeTests {
     }
 }
 
-// MARK: - Error Tests
+// MARK: - Edge Case Tests
 
-@Suite("Binary.LEB128.Error")
-struct LEB128ErrorTests {
+extension BinaryLEB128Tests.EdgeCase {
 
     @Test
     func `error is Sendable`() async {

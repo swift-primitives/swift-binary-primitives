@@ -1,40 +1,58 @@
-import Binary_Primitives
+// Binary.Format.Bytes Tests.swift
+
 import Testing
 
-@Suite
-struct `Binary.Format.Bytes Tests` {
+import Binary_Primitives
+import Binary_Primitives_Test_Support
+
+// MARK: - Test Suites
+
+/// Tests for Binary.Format.Bytes - non-generic type using type extension pattern per [TEST-003].
+extension Binary.Format.Bytes {
+    @Suite
+    struct Test {
+        @Suite struct Unit {}
+        @Suite struct EdgeCase {}
+        @Suite struct Integration {}
+        @Suite(.serialized) struct Performance {}
+    }
+}
+
+// MARK: - Unit Tests
+
+extension Binary.Format.Bytes.Test.Unit {
 
     // MARK: - Basic Decimal Formatting
 
     @Test
-    func `Basic byte formatting`() {
+    func `basic byte formatting`() {
         #expect(0.formatted(Binary.Format.bytes) == "0 B")
         #expect(512.formatted(Binary.Format.bytes) == "512 B")
         #expect(999.formatted(Binary.Format.bytes) == "999 B")
     }
 
     @Test
-    func `Kilobyte formatting`() {
+    func `kilobyte formatting`() {
         #expect(1000.formatted(Binary.Format.bytes) == "1 KB")
         #expect(1500.formatted(Binary.Format.bytes) == "1.5 KB")
         #expect(500_000.formatted(Binary.Format.bytes) == "500 KB")
     }
 
     @Test
-    func `Megabyte formatting`() {
+    func `megabyte formatting`() {
         #expect(1_000_000.formatted(Binary.Format.bytes) == "1 MB")
         #expect(1_500_000.formatted(Binary.Format.bytes) == "1.5 MB")
         #expect(500_000_000.formatted(Binary.Format.bytes) == "500 MB")
     }
 
     @Test
-    func `Gigabyte formatting`() {
+    func `gigabyte formatting`() {
         #expect(1_000_000_000.formatted(Binary.Format.bytes) == "1 GB")
         #expect(1_500_000_000.formatted(Binary.Format.bytes) == "1.5 GB")
     }
 
     @Test
-    func `Terabyte formatting`() {
+    func `terabyte formatting`() {
         #expect(1_000_000_000_000.formatted(Binary.Format.bytes) == "1 TB")
         #expect(2_500_000_000_000.formatted(Binary.Format.bytes) == "2.5 TB")
     }
@@ -42,7 +60,7 @@ struct `Binary.Format.Bytes Tests` {
     // MARK: - Binary Unit Formatting
 
     @Test
-    func `Binary unit formatting`() {
+    func `binary unit formatting`() {
         #expect(1024.formatted(Binary.Format.bytes(.binary)) == "1 KiB")
         #expect(1536.formatted(Binary.Format.bytes(.binary)) == "1.5 KiB")
         #expect(1_048_576.formatted(Binary.Format.bytes(.binary)) == "1 MiB")
@@ -50,7 +68,7 @@ struct `Binary.Format.Bytes Tests` {
     }
 
     @Test
-    func `Decimal vs binary difference`() {
+    func `decimal vs binary difference`() {
         // 1024 bytes shows different values in each system
         #expect(1024.formatted(Binary.Format.bytes(.decimal)) == "1.02 KB")
         #expect(1024.formatted(Binary.Format.bytes(.binary)) == "1 KiB")
@@ -63,7 +81,7 @@ struct `Binary.Format.Bytes Tests` {
     // MARK: - Precision Control
 
     @Test
-    func `Precision formatting`() {
+    func `precision formatting`() {
         #expect(1536.formatted(Binary.Format.bytes.precision(0)) == "2 KB")
         #expect(1536.formatted(Binary.Format.bytes.precision(1)) == "1.5 KB")
         #expect(1536.formatted(Binary.Format.bytes.precision(2)) == "1.54 KB")
@@ -71,7 +89,7 @@ struct `Binary.Format.Bytes Tests` {
     }
 
     @Test
-    func `Auto precision strips trailing zeros`() {
+    func `auto precision strips trailing zeros`() {
         #expect(1000.formatted(Binary.Format.bytes) == "1 KB")
         #expect(1100.formatted(Binary.Format.bytes) == "1.1 KB")
         #expect(1120.formatted(Binary.Format.bytes) == "1.12 KB")
@@ -80,13 +98,13 @@ struct `Binary.Format.Bytes Tests` {
     // MARK: - Notation Styles
 
     @Test
-    func `Spaced notation`() {
+    func `spaced notation`() {
         #expect(1024.formatted(Binary.Format.bytes.notation(.spaced)) == "1.02 KB")
         #expect(1_000_000.formatted(Binary.Format.bytes.notation(.spaced)) == "1 MB")
     }
 
     @Test
-    func `Compact notation`() {
+    func `compact notation`() {
         #expect(1024.formatted(Binary.Format.bytes.notation(.compactName)) == "1.02KB")
         #expect(1_000_000.formatted(Binary.Format.bytes.notation(.compactName)) == "1MB")
     }
@@ -94,19 +112,19 @@ struct `Binary.Format.Bytes Tests` {
     // MARK: - Chaining
 
     @Test
-    func `Chained configuration`() {
+    func `chained configuration`() {
         let format = Binary.Format.Bytes.bytes(.binary).precision(2).notation(.compactName)
         #expect(1536.formatted(format) == "1.50KiB")
     }
 
     @Test
-    func `Units via function`() {
+    func `units via function`() {
         #expect(1024.formatted(Binary.Format.bytes(.binary)) == "1 KiB")
         #expect(1024.formatted(Binary.Format.bytes(.decimal)) == "1.02 KB")
     }
 
     @Test
-    func `Units via chaining`() {
+    func `units via chaining`() {
         #expect(1024.formatted(Binary.Format.bytes.units(.binary)) == "1 KiB")
         #expect(1024.formatted(Binary.Format.bytes.units(.decimal)) == "1.02 KB")
     }
@@ -114,38 +132,41 @@ struct `Binary.Format.Bytes Tests` {
     // MARK: - Without Unit
 
     @Test
-    func `Without unit suffix`() {
+    func `without unit suffix`() {
         #expect(1024.formatted(Binary.Format.bytes.withoutUnit()) == "1.02")
         #expect(1_000_000.formatted(Binary.Format.bytes.withoutUnit()) == "1")
-    }
-
-    // MARK: - Edge Cases
-
-    @Test
-    func `Zero bytes`() {
-        #expect(0.formatted(Binary.Format.bytes) == "0 B")
-        #expect(0.formatted(Binary.Format.bytes(.binary)) == "0 B")
-    }
-
-    @Test
-    func `Negative bytes`() {
-        #expect((-1024).formatted(Binary.Format.bytes) == "-1.02 KB")
-        #expect((-1024).formatted(Binary.Format.bytes(.binary)) == "-1 KiB")
-    }
-
-    @Test
-    func `Large values`() {
-        #expect(1_000_000_000_000_000.formatted(Binary.Format.bytes) == "1 PB")
-        #expect(1_125_899_906_842_624.formatted(Binary.Format.bytes(.binary)) == "1 PiB")
     }
 
     // MARK: - Different Integer Types
 
     @Test
-    func `Various integer types`() {
+    func `various integer types`() {
         #expect(UInt8(255).formatted(Binary.Format.bytes) == "255 B")
         #expect(Int16(1000).formatted(Binary.Format.bytes) == "1 KB")
         #expect(UInt32(1_000_000).formatted(Binary.Format.bytes) == "1 MB")
         #expect(Int64(1_000_000_000).formatted(Binary.Format.bytes) == "1 GB")
+    }
+}
+
+// MARK: - Edge Case Tests
+
+extension Binary.Format.Bytes.Test.EdgeCase {
+
+    @Test
+    func `zero bytes`() {
+        #expect(0.formatted(Binary.Format.bytes) == "0 B")
+        #expect(0.formatted(Binary.Format.bytes(.binary)) == "0 B")
+    }
+
+    @Test
+    func `negative bytes`() {
+        #expect((-1024).formatted(Binary.Format.bytes) == "-1.02 KB")
+        #expect((-1024).formatted(Binary.Format.bytes(.binary)) == "-1 KiB")
+    }
+
+    @Test
+    func `large values`() {
+        #expect(1_000_000_000_000_000.formatted(Binary.Format.bytes) == "1 PB")
+        #expect(1_125_899_906_842_624.formatted(Binary.Format.bytes(.binary)) == "1 PiB")
     }
 }

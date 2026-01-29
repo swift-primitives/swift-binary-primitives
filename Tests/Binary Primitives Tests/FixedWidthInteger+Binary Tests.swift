@@ -1,10 +1,27 @@
-import Test_Primitives
+// FixedWidthInteger+Binary Tests.swift
+
 import Testing
 
-@testable import Binary_Primitives
+import Test_Primitives
 
-@Suite
-struct `FixedWidthInteger - Extensions` {
+@testable import Binary_Primitives
+import Binary_Primitives_Test_Support
+
+// MARK: - Test Suites
+
+/// Tests for FixedWidthInteger extensions - uses parallel namespace pattern
+/// since these are protocol extensions.
+@Suite("FixedWidthInteger+Binary")
+struct FixedWidthIntegerBinaryTests {
+    @Suite struct Unit {}
+    @Suite struct EdgeCase {}
+    @Suite struct Integration {}
+    @Suite(.serialized) struct Performance {}
+}
+
+// MARK: - Unit Tests
+
+extension FixedWidthIntegerBinaryTests.Unit {
 
     // MARK: - rotateLeft(by:)
 
@@ -227,10 +244,8 @@ struct `FixedWidthInteger - Extensions` {
         #expect(bigEndian[0] == 0x12)
         #expect(bigEndian[1] == 0x34)
     }
-}
 
-@Suite
-struct `FixedWidthInteger - Type Specific` {
+    // MARK: - Type-Specific Tests
 
     @Test
     func `UInt8 rotations`() {
@@ -275,13 +290,3 @@ struct `FixedWidthInteger - Type Specific` {
         #expect(reversed == -256)
     }
 }
-
-// MARK: - Performance Tests
-// TODO: Re-enable when Performance Tests infrastructure is available in Binary Tests
-//
-// extension `Performance Tests` {
-//     @Suite
-//     struct `FixedWidthInteger - Performance` {
-//         ...
-//     }
-// }

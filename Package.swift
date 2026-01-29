@@ -16,6 +16,10 @@ let package = Package(
             name: "Binary Primitives",
             targets: ["Binary Primitives"]
         ),
+        .library(
+            name: "Binary Primitives Test Support",
+            targets: ["Binary Primitives Test Support"]
+        ),
     ],
     dependencies: [
         .package(path: "../swift-bit-primitives"),
@@ -37,10 +41,20 @@ let package = Package(
                 .product(name: "Standard Library Extensions", package: "swift-standard-library-extensions"),
             ]
         ),
+        .target(
+            name: "Binary Primitives Test Support",
+            dependencies: [
+                "Binary Primitives",
+                .product(name: "Memory Primitives Test Support", package: "swift-memory-primitives"),
+                .product(name: "Bit Primitives Test Support", package: "swift-bit-primitives"),
+            ],
+            path: "Tests/Support"
+        ),
         .testTarget(
             name: "Binary Primitives Tests",
             dependencies: [
                 "Binary Primitives",
+                "Binary Primitives Test Support",
             ]
         ),
     ],

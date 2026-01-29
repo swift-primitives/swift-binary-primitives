@@ -1,14 +1,13 @@
+// Binary.Serializable Tests.swift
+// swift-binary-primitives
 //
-//  Binary.Serializable Tests.swift
-//  swift-standards
-//
-//  Tests demonstrating the Binary.Serializable protocol for byte serialization.
-//  These tests serve as both verification and documentation of ideal API usage patterns.
-//
+// Tests demonstrating the Binary.Serializable protocol for byte serialization.
+// These tests serve as both verification and documentation of ideal API usage patterns.
 
 import Testing
 
 @testable import Binary_Primitives
+import Binary_Primitives_Test_Support
 
 // MARK: - Example Serializable Types
 
@@ -78,16 +77,26 @@ private struct LargeContent: Binary.Serializable {
     }
 }
 
-// MARK: - Basic Serialization Tests
+// MARK: - Test Suites
 
-@Suite
-struct `Binary.Serializable - Basic Usage` {
+/// Tests for Binary.Serializable protocol - uses parallel namespace pattern
+/// since Binary.Serializable is a protocol.
+@Suite("Binary.Serializable")
+struct BinarySerializableTests {
+    @Suite struct Unit {}
+    @Suite struct EdgeCase {}
+    @Suite struct Integration {}
+    @Suite(.serialized) struct Performance {}
+}
+
+// MARK: - Unit Tests
+
+extension BinarySerializableTests.Unit {
 
     @Test
-    func `Serialize into byte array using serialize(into:)`() {
+    func `serialize into byte array using serialize(into:)`() {
         let greeting = Greeting(name: "World")
 
-        // Ideal usage: serialize into a mutable buffer
         var buffer: [UInt8] = []
         greeting.serialize(into: &buffer)
 
@@ -95,17 +104,16 @@ struct `Binary.Serializable - Basic Usage` {
     }
 
     @Test
-    func `Get bytes using .bytes property`() {
+    func `get bytes using .bytes property`() {
         let greeting = Greeting(name: "Swift")
 
-        // Convenience: get bytes directly
         let bytes = greeting.bytes
 
         #expect(bytes == Array("Hello, Swift!".utf8))
     }
 
     @Test
-    func `Get bytes from static serialize`() {
+    func `get bytes from static serialize`() {
         let content = LargeContent(lines: ["Line 1", "Line 2", "Line 3"])
 
         let bytes: [UInt8] = LargeContent.serialize(content)
@@ -114,33 +122,25 @@ struct `Binary.Serializable - Basic Usage` {
     }
 
     @Test
-    func `Convert to String`() {
+    func `convert to String`() {
         let element = Element(tag: "p", content: "Hello")
 
-        // Convert streaming value to String
         let string = String(element)
 
         #expect(string == "<p>Hello</p>")
     }
 
     @Test
-    func `Use static serialize function`() {
+    func `use static serialize function`() {
         let greeting = Greeting(name: "API")
 
-        // Static function style (compatible with Binary.ASCII.Serializable)
         let bytes: [UInt8] = Greeting.serialize(greeting)
 
         #expect(bytes == Array("Hello, API!".utf8))
     }
-}
-
-// MARK: - Composition Tests
-
-@Suite
-struct `Binary.Serializable - Composition` {
 
     @Test
-    func `Nested streaming types compose naturally`() {
+    func `nested streaming types compose naturally`() {
         let container = Container(children: [
             Element(tag: "h1", content: "Title"),
             Element(tag: "p", content: "Paragraph"),
@@ -152,12 +152,11 @@ struct `Binary.Serializable - Composition` {
     }
 
     @Test
-    func `Serialize multiple values into same buffer`() {
+    func `serialize multiple values into same buffer`() {
         let header = Element(tag: "header", content: "Header")
         let main = Element(tag: "main", content: "Content")
         let footer = Element(tag: "footer", content: "Footer")
 
-        // Accumulate multiple serializations
         var buffer: [UInt8] = []
         header.serialize(into: &buffer)
         main.serialize(into: &buffer)
@@ -168,37 +167,7 @@ struct `Binary.Serializable - Composition` {
     }
 
     @Test
-    func `Pre-allocate buffer for efficiency`() {
-        let lines = (1...100).map { "Line \($0)" }
-        let content = LargeContent(lines: lines)
-
-        // Pre-allocate for known large output
-        var buffer: [UInt8] = []
-        buffer.reserveCapacity(1000)
-        content.serialize(into: &buffer)
-
-        #expect(buffer.count > 500)
-        #expect(String(decoding: buffer, as: UTF8.self).hasPrefix("Line 1\nLine 2"))
-    }
-}
-
-// MARK: - Buffer Type Tests
-
-@Suite
-struct `Binary.Serializable - Buffer Types` {
-
-    @Test
-    func `Serialize into [UInt8]`() {
-        let greeting = Greeting(name: "Array")
-
-        var buffer: [UInt8] = []
-        greeting.serialize(into: &buffer)
-
-        #expect(buffer == Array("Hello, Array!".utf8))
-    }
-
-    @Test
-    func `Serialize into ContiguousArray`() {
+    func `serialize into ContiguousArray`() {
         let greeting = Greeting(name: "Contiguous")
 
         var buffer: ContiguousArray<UInt8> = []
@@ -208,144 +177,14 @@ struct `Binary.Serializable - Buffer Types` {
     }
 
     @Test
-    func `Append to existing buffer content`() {
+    func `append to existing buffer content`() {
         let greeting = Greeting(name: "Append")
 
-        // Start with existing content
         var buffer: [UInt8] = Array("Prefix: ".utf8)
         greeting.serialize(into: &buffer)
 
         #expect(buffer == Array("Prefix: Hello, Append!".utf8))
     }
-}
-
-// MARK: - Edge Cases
-
-@Suite
-struct `Binary.Serializable - Edge Cases` {
-
-    @Test
-    func `Empty content serializes correctly`() {
-        let empty = Element(tag: "br", content: "")
-
-        #expect(empty.bytes == Array("<br></br>".utf8))
-    }
-
-    @Test
-    func `Unicode content serializes as UTF-8`() {
-        let unicode = Element(tag: "span", content: "Hello 👋 World 🌍")
-
-        let bytes = unicode.bytes
-        let roundTrip = String(decoding: bytes, as: UTF8.self)
-
-        #expect(roundTrip == "<span>Hello 👋 World 🌍</span>")
-    }
-
-    @Test
-    func `Large content doesn't overflow`() {
-        let lines = (1...10000).map { "Line number \($0) with some content" }
-        let content = LargeContent(lines: lines)
-
-        let bytes = content.bytes
-
-        #expect(bytes.count > 100000)
-    }
-}
-
-// MARK: - Overload Resolution Tests
-
-@Suite
-struct `Binary.Serializable - Overload Resolution` {
-
-    @Test
-    func `Integer literal appends raw byte not ASCII decimal`() {
-        // This test verifies that append(0xFE) appends the raw byte 254,
-        // not the ASCII decimal string "254" (which would be [50, 53, 52]).
-        // The generic append<S: Binary.Serializable> must be @_disfavoredOverload
-        // to ensure the specific append(_ value: UInt8) is preferred.
-        var buffer: [UInt8] = []
-        buffer.append(0xFE)
-        buffer.append(0xFF)
-
-        #expect(buffer == [254, 255], "Should append raw bytes, not ASCII decimal strings")
-        #expect(buffer != [50, 53, 52, 50, 53, 53], "Must not serialize as ASCII '254255'")
-    }
-
-    @Test
-    func `High byte literals append correctly`() {
-        var buffer: [UInt8] = []
-        buffer.append(0x00)
-        buffer.append(0x7F)
-        buffer.append(0x80)
-        buffer.append(0xFF)
-
-        #expect(buffer == [0, 127, 128, 255])
-    }
-}
-
-// MARK: - API Design Demonstration
-
-@Suite
-struct `Binary.Serializable - API Patterns` {
-
-    @Test
-    func `Pattern: Direct buffer writing for maximum control`() {
-        // When you need maximum control over the buffer
-        var buffer: [UInt8] = []
-        buffer.reserveCapacity(256)
-
-        let parts = [
-            Element(tag: "a", content: "Link"),
-            Element(tag: "b", content: "Bold"),
-        ]
-
-        for part in parts {
-            part.serialize(into: &buffer)
-        }
-
-        #expect(buffer == Array("<a>Link</a><b>Bold</b>".utf8))
-    }
-
-    @Test
-    func `Pattern: Quick conversion via .bytes`() {
-        // When you just need bytes quickly
-        let element = Element(tag: "code", content: "swift")
-        let bytes = element.bytes
-
-        #expect(bytes == Array("<code>swift</code>".utf8))
-    }
-
-    @Test
-    func `Pattern: String output via String(_:)`() {
-        // When you need a String result
-        let element = Element(tag: "em", content: "emphasis")
-        let string = String(element)
-
-        #expect(string == "<em>emphasis</em>")
-    }
-
-    @Test
-    func `Pattern: Reusable buffer for repeated serialization`() {
-        // Reuse buffer to avoid allocations
-        var buffer: [UInt8] = []
-
-        let elements = ["one", "two", "three"].map { Element(tag: "li", content: $0) }
-        var results: [String] = []
-
-        for element in elements {
-            buffer.removeAll(keepingCapacity: true)
-            element.serialize(into: &buffer)
-            results.append(String(decoding: buffer, as: UTF8.self))
-        }
-
-        #expect(results == ["<li>one</li>", "<li>two</li>", "<li>three</li>"])
-    }
-}
-
-// MARK: - Span Access Tests
-
-@Suite
-struct `Binary.Serializable - Span Access` {
 
     @Test
     func `withSerializedBytes provides correct bytes`() {
@@ -372,18 +211,6 @@ struct `Binary.Serializable - Span Access` {
     }
 
     @Test
-    func `withSerializedBytes propagates typed errors`() throws {
-        enum TestError: Error { case test }
-        let greeting = Greeting(name: "Error")
-
-        #expect(throws: TestError.self) {
-            try greeting.withSerializedBytes { _ in
-                throw TestError.test
-            }
-        }
-    }
-
-    @Test
     func `withSerializedBytes returns closure result`() {
         let greeting = Greeting(name: "Result")
 
@@ -395,27 +222,131 @@ struct `Binary.Serializable - Span Access` {
     }
 
     @Test
-    func `withSerializedBytes non-throwing closure is non-throwing`() {
-        let element = Element(tag: "span", content: "zero-copy")
-
-        // This should compile without 'try' because the closure is non-throwing
-        // (E is inferred as Never)
-        let length = element.withSerializedBytes { span in
-            span.count
-        }
-
-        #expect(length == "<span>zero-copy</span>".utf8.count)
-    }
-
-    @Test
     func `withSerializedBytes provides borrowing access to bytes`() {
         let greeting = Greeting(name: "Test")
 
-        // Verify we can read individual bytes through the span
         let firstByte = greeting.withSerializedBytes { span in
             span[0]
         }
 
         #expect(firstByte == UInt8(ascii: "H"))
+    }
+}
+
+// MARK: - Edge Case Tests
+
+extension BinarySerializableTests.EdgeCase {
+
+    @Test
+    func `empty content serializes correctly`() {
+        let empty = Element(tag: "br", content: "")
+
+        #expect(empty.bytes == Array("<br></br>".utf8))
+    }
+
+    @Test
+    func `unicode content serializes as UTF-8`() {
+        let unicode = Element(tag: "span", content: "Hello 👋 World 🌍")
+
+        let bytes = unicode.bytes
+        let roundTrip = String(decoding: bytes, as: UTF8.self)
+
+        #expect(roundTrip == "<span>Hello 👋 World 🌍</span>")
+    }
+
+    @Test
+    func `large content doesn't overflow`() {
+        let lines = (1...10000).map { "Line number \($0) with some content" }
+        let content = LargeContent(lines: lines)
+
+        let bytes = content.bytes
+
+        #expect(bytes.count > 100000)
+    }
+
+    @Test
+    func `integer literal appends raw byte not ASCII decimal`() {
+        // This test verifies that append(0xFE) appends the raw byte 254,
+        // not the ASCII decimal string "254" (which would be [50, 53, 52]).
+        var buffer: [UInt8] = []
+        buffer.append(0xFE)
+        buffer.append(0xFF)
+
+        #expect(buffer == [254, 255], "Should append raw bytes, not ASCII decimal strings")
+        #expect(buffer != [50, 53, 52, 50, 53, 53], "Must not serialize as ASCII '254255'")
+    }
+
+    @Test
+    func `high byte literals append correctly`() {
+        var buffer: [UInt8] = []
+        buffer.append(0x00)
+        buffer.append(0x7F)
+        buffer.append(0x80)
+        buffer.append(0xFF)
+
+        #expect(buffer == [0, 127, 128, 255])
+    }
+
+    @Test
+    func `withSerializedBytes propagates typed errors`() throws {
+        enum TestError: Error { case test }
+        let greeting = Greeting(name: "Error")
+
+        #expect(throws: TestError.self) {
+            try greeting.withSerializedBytes { _ in
+                throw TestError.test
+            }
+        }
+    }
+}
+
+// MARK: - Integration Tests
+
+extension BinarySerializableTests.Integration {
+
+    @Test
+    func `pre-allocate buffer for efficiency`() {
+        let lines = (1...100).map { "Line \($0)" }
+        let content = LargeContent(lines: lines)
+
+        var buffer: [UInt8] = []
+        buffer.reserveCapacity(1000)
+        content.serialize(into: &buffer)
+
+        #expect(buffer.count > 500)
+        #expect(String(decoding: buffer, as: UTF8.self).hasPrefix("Line 1\nLine 2"))
+    }
+
+    @Test
+    func `direct buffer writing for maximum control`() {
+        var buffer: [UInt8] = []
+        buffer.reserveCapacity(256)
+
+        let parts = [
+            Element(tag: "a", content: "Link"),
+            Element(tag: "b", content: "Bold"),
+        ]
+
+        for part in parts {
+            part.serialize(into: &buffer)
+        }
+
+        #expect(buffer == Array("<a>Link</a><b>Bold</b>".utf8))
+    }
+
+    @Test
+    func `reusable buffer for repeated serialization`() {
+        var buffer: [UInt8] = []
+
+        let elements = ["one", "two", "three"].map { Element(tag: "li", content: $0) }
+        var results: [String] = []
+
+        for element in elements {
+            buffer.removeAll(keepingCapacity: true)
+            element.serialize(into: &buffer)
+            results.append(String(decoding: buffer, as: UTF8.self))
+        }
+
+        #expect(results == ["<li>one</li>", "<li>two</li>", "<li>three</li>"])
     }
 }

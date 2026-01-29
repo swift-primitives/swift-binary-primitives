@@ -4,9 +4,32 @@
 import Testing
 
 @testable import Binary_Primitives
+import Binary_Primitives_Test_Support
 
-@Suite
-struct `Binary.Storage Tests` {
+// MARK: - Test Suites
+
+/// Tests for Binary.Storage protocol - uses parallel namespace pattern per [TEST-004]
+/// since Binary.Storage is a protocol.
+@Suite("Binary.Storage")
+struct BinaryStorageTests {
+    @Suite struct Unit {}
+    @Suite struct EdgeCase {}
+    @Suite struct Integration {}
+    @Suite(.serialized) struct Performance {}
+}
+
+/// Tests for Binary.MutableStorage protocol.
+@Suite("Binary.MutableStorage")
+struct BinaryMutableStorageTests {
+    @Suite struct Unit {}
+    @Suite struct EdgeCase {}
+    @Suite struct Integration {}
+    @Suite(.serialized) struct Performance {}
+}
+
+// MARK: - Binary.Storage Unit Tests
+
+extension BinaryStorageTests.Unit {
 
     // MARK: - Array<UInt8> Conformance
 
@@ -70,8 +93,9 @@ struct `Binary.Storage Tests` {
     }
 }
 
-@Suite
-struct `Binary.MutableStorage Tests` {
+// MARK: - Binary.MutableStorage Unit Tests
+
+extension BinaryMutableStorageTests.Unit {
 
     // MARK: - Array<UInt8> Conformance
 
@@ -139,9 +163,4 @@ struct `Binary.MutableStorage Tests` {
         #expect(byteCount(array) == 3)
         #expect(byteCount(contiguousArray) == 2)
     }
-
-    // Note: Generic mutation tests with Binary.MutableStorage would require
-    // closure-based access patterns due to MutableSpan lifetime semantics.
-    // The withUnsafeMutableBytes method on Array/ContiguousArray provides
-    // the proper scoped mutation pattern.
 }

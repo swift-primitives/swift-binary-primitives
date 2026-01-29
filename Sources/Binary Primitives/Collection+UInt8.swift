@@ -1,4 +1,4 @@
-// Collection+Bytes.swift
+// Collection+UInt8.swift
 // Byte collection utilities.
 
 // MARK: - Byte Collection Trimming
