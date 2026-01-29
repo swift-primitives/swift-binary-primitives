@@ -6,3 +6,5 @@
 //
 
 @_exported import Bit_Primitives
+@_exported import Memory_Primitives
+@_exported import Standard_Library_Extensions

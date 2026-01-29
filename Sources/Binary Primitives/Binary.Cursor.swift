@@ -33,7 +33,7 @@ extension Binary {
     /// `0 <= readerIndex <= writerIndex <= count`
     ///
     /// The `count` is stored as `Storage.Scalar` and validated once at construction.
-    public struct Cursor<Storage: Binary.Mutable & ~Copyable>: ~Copyable {
+    public struct Cursor<Storage: Binary.MutableStorage>: ~Copyable {
         /// The underlying storage.
         public var storage: Storage
 
@@ -71,7 +71,7 @@ extension Binary {
 
 // MARK: - Default Initializer
 
-extension Binary.Cursor where Storage: ~Copyable {
+extension Binary.Cursor {
     /// Creates a cursor over the given storage with indices at zero.
     ///
     /// This is the simplest way to create a cursor. Both reader and writer
@@ -86,14 +86,14 @@ extension Binary.Cursor where Storage: ~Copyable {
         }
         self.storage = storage
         self._count = count
-        self._readerIndex = 0
-        self._writerIndex = 0
+        self._readerIndex = Binary.Position(Storage.Scalar(0))
+        self._writerIndex = Binary.Position(Storage.Scalar(0))
     }
 }
 
 // MARK: - Validated Initializer
 
-extension Binary.Cursor where Storage: ~Copyable {
+extension Binary.Cursor {
     /// Creates a cursor over the given storage with validated indices.
     ///
     /// - Parameters:
@@ -145,7 +145,7 @@ extension Binary.Cursor where Storage: ~Copyable {
 
 // MARK: - Unchecked Initializer
 
-extension Binary.Cursor where Storage: ~Copyable {
+extension Binary.Cursor {
     /// Creates a cursor without validation.
     ///
     /// Use this in performance-critical paths where invariants are
@@ -179,7 +179,7 @@ extension Binary.Cursor where Storage: ~Copyable {
 
 // MARK: - Computed Properties
 
-extension Binary.Cursor where Storage: ~Copyable {
+extension Binary.Cursor {
     /// Bytes available for reading.
 
     public var readableCount: Binary.Count<Storage.Scalar, Storage.Space> {
@@ -209,7 +209,7 @@ extension Binary.Cursor where Storage: ~Copyable {
 
 // MARK: - Move Reader Index
 
-extension Binary.Cursor where Storage: ~Copyable {
+extension Binary.Cursor {
     /// Move reader index by offset.
     ///
     /// - Parameter offset: The displacement to apply.
@@ -269,7 +269,7 @@ extension Binary.Cursor where Storage: ~Copyable {
 
 // MARK: - Move Writer Index
 
-extension Binary.Cursor where Storage: ~Copyable {
+extension Binary.Cursor {
     /// Move writer index by offset.
     ///
     /// - Parameter offset: The displacement to apply.
@@ -330,7 +330,7 @@ extension Binary.Cursor where Storage: ~Copyable {
 
 // MARK: - Set Reader Index
 
-extension Binary.Cursor where Storage: ~Copyable {
+extension Binary.Cursor {
     /// Set reader index to position.
     ///
     /// - Parameter position: The new reader position.
@@ -375,7 +375,7 @@ extension Binary.Cursor where Storage: ~Copyable {
 
 // MARK: - Set Writer Index
 
-extension Binary.Cursor where Storage: ~Copyable {
+extension Binary.Cursor {
     /// Set writer index to position.
     ///
     /// - Parameter position: The new writer position.
@@ -427,41 +427,47 @@ extension Binary.Cursor where Storage: ~Copyable {
 
 // MARK: - Reset
 
-extension Binary.Cursor where Storage: ~Copyable {
+extension Binary.Cursor {
     /// Reset both indices to zero.
 
     public mutating func reset() {
-        _readerIndex = 0
-        _writerIndex = 0
+        _readerIndex = Binary.Position(Storage.Scalar(0))
+        _writerIndex = Binary.Position(Storage.Scalar(0))
     }
 }
 
 // MARK: - Region Access
 
-extension Binary.Cursor where Storage: ~Copyable {
-    /// Provides read-only access to the readable bytes region.
+extension Binary.Cursor {
+    /// Returns a span of the readable bytes region.
+    ///
+    /// The readable region is `storage[readerIndex..<writerIndex]`.
+    /// The span is lifetime-bound to the cursor.
+    @inlinable
+    public var readableBytes: Span<UInt8> {
+        @_lifetime(borrow self)
+        borrowing get {
+            let readerIdx = Int(_readerIndex.rawValue)
+            let writerIdx = Int(_writerIndex.rawValue)
+            return storage.bytes.extracting(readerIdx..<writerIdx)
+        }
+    }
+
+    /// Provides read-only access to the readable bytes region via closure.
     ///
     /// The readable region is `storage[readerIndex..<writerIndex]`.
     /// The buffer pointer is valid only within the closure scope.
-
+    @inlinable
     public func withReadableBytes<R, E: Swift.Error>(
         _ body: (UnsafeRawBufferPointer) throws(E) -> R
     ) throws(E) -> R {
-        let readerIdx = Int(_readerIndex.rawValue)
-        let writerIdx = Int(_writerIndex.rawValue)
-        return try unsafe storage.withBytes(in: readerIdx..<writerIdx, body)
+        let span = readableBytes
+        return try unsafe span.withUnsafeBytes { (rawBuffer: UnsafeRawBufferPointer) throws(E) -> R in
+            try unsafe body(rawBuffer)
+        }
     }
 
-    /// Provides mutable access to the writable bytes region.
-    ///
-    /// The writable region is `storage[writerIndex..<count]`.
-    /// The buffer pointer is valid only within the closure scope.
-
-    public mutating func withWritableBytes<R, E: Swift.Error>(
-        _ body: (UnsafeMutableRawBufferPointer) throws(E) -> R
-    ) throws(E) -> R {
-        let writerIdx = Int(_writerIndex.rawValue)
-        let storageCount = Int(_count)
-        return try unsafe storage.withBytes.mutable(in: writerIdx..<storageCount, body)
-    }
+    // TODO: Add withWritableBytes once MutableSpan lifetime semantics
+    // are resolved. MutableSpan's borrow constraints currently prevent
+    // slicing the span and passing to a closure in a single operation.
 }

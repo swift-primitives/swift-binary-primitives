@@ -21,6 +21,7 @@ let package = Package(
         .package(path: "../swift-bit-primitives"),
         .package(path: "../swift-dimension-primitives"),
         .package(path: "../swift-formatting-primitives"),
+        .package(path: "../swift-memory-primitives"),
         .package(path: "../swift-serialization-primitives"),
         .package(path: "../swift-standard-library-extensions"),
     ],
@@ -31,8 +32,15 @@ let package = Package(
                 .product(name: "Bit Primitives", package: "swift-bit-primitives"),
                 .product(name: "Dimension Primitives", package: "swift-dimension-primitives"),
                 .product(name: "Formatting Primitives", package: "swift-formatting-primitives"),
+                .product(name: "Memory Primitives", package: "swift-memory-primitives"),
                 .product(name: "Serialization Primitives", package: "swift-serialization-primitives"),
                 .product(name: "Standard Library Extensions", package: "swift-standard-library-extensions"),
+            ]
+        ),
+        .testTarget(
+            name: "Binary Primitives Tests",
+            dependencies: [
+                "Binary Primitives",
             ]
         ),
     ],

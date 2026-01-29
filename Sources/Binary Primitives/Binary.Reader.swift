@@ -33,7 +33,7 @@ extension Binary {
     /// `0 <= readerIndex <= count`
     ///
     /// The `count` is stored as `Storage.Scalar` and validated once at construction.
-    public struct Reader<Storage: Binary.Contiguous>: ~Copyable {
+    public struct Reader<Storage: Binary.Storage>: ~Copyable {
         /// The underlying storage.
         public let storage: Storage
 
@@ -73,7 +73,7 @@ extension Binary.Reader {
         }
         self.storage = storage
         self._count = count
-        self._readerIndex = 0
+        self._readerIndex = Binary.Position(Storage.Scalar(0))
     }
 }
 
@@ -134,8 +134,9 @@ extension Binary.Reader {
     public init(
         __unchecked: Void = (),
         storage: consuming Storage,
-        readerIndex: Binary.Position<Storage.Scalar, Storage.Space> = 0
+        readerIndex: Binary.Position<Storage.Scalar, Storage.Space>? = nil
     ) {
+        let readerIndex = readerIndex ?? Binary.Position(Storage.Scalar(0))
         let count = Storage.Scalar(exactly: storage.count)
         precondition(count != nil, "storage.count exceeds Scalar range")
         precondition(readerIndex.rawValue >= 0)
@@ -282,23 +283,38 @@ extension Binary.Reader {
     /// Reset reader index to zero.
 
     public mutating func reset() {
-        _readerIndex = 0
+        _readerIndex = Binary.Position(Storage.Scalar(0))
     }
 }
 
 // MARK: - Region Access
 
 extension Binary.Reader {
-    /// Provides read-only access to the remaining bytes region.
+    /// Returns a span of the remaining bytes region.
+    ///
+    /// The remaining region is `storage[readerIndex..<count]`.
+    /// The span is lifetime-bound to the reader.
+    @inlinable
+    public var remainingBytes: Span<UInt8> {
+        @_lifetime(borrow self)
+        borrowing get {
+            let readerIdx = Int(_readerIndex.rawValue)
+            let storageCount = Int(_count)
+            return storage.bytes.extracting(readerIdx..<storageCount)
+        }
+    }
+
+    /// Provides read-only access to the remaining bytes region via closure.
     ///
     /// The remaining region is `storage[readerIndex..<count]`.
     /// The buffer pointer is valid only within the closure scope.
-
+    @inlinable
     public func withRemainingBytes<R, E: Swift.Error>(
         _ body: (UnsafeRawBufferPointer) throws(E) -> R
     ) throws(E) -> R {
-        let readerIdx = Int(_readerIndex.rawValue)
-        let storageCount = Int(_count)
-        return try unsafe storage.withBytes(in: readerIdx..<storageCount, body)
+        let span = remainingBytes
+        return try unsafe span.withUnsafeBytes { (rawBuffer: UnsafeRawBufferPointer) throws(E) -> R in
+            try unsafe body(rawBuffer)
+        }
     }
 }

@@ -21,7 +21,7 @@ extension Optional where Wrapped: Comparable {
     /// let nilRange: Range<Int>? = nil ..<? 10   // nil (nil input)
     /// ```
     @inlinable
-    public static func ..<? (lhs: Self, rhs: Self) -> Range<Wrapped>? {
+    public static func ..<? (lhs: Self, rhs: Self) -> Swift.Range<Wrapped>? {
         guard let a = lhs, let b = rhs, a < b else { return nil }
         return a..<b
     }

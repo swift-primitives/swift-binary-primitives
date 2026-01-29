@@ -408,7 +408,7 @@ struct OptionalOperatorIntegrationTests {
 
     @Test("offset calculation with bounds check")
     func offsetCalculation() {
-        func safeOffset(base: Int?, offset: Int?) -> Range<Int>? {
+        func safeOffset(base: Int?, offset: Int?) -> Swift.Range<Int>? {
             guard let start = base, let length = offset else { return nil }
             let end = start +? length
             return start ..<? end
@@ -416,6 +416,6 @@ struct OptionalOperatorIntegrationTests {
 
         #expect(safeOffset(base: 100, offset: 50) == 100..<150)
         #expect(safeOffset(base: Int.max - 10, offset: 20) == nil)
-        #expect(safeOffset(base: nil, offset: 50) == nil)
+        #expect(safeOffset(base: Optional<Int>.none, offset: 50) == nil)
     }
 }
