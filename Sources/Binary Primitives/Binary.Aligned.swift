@@ -1,4 +1,4 @@
-// Aligned.swift
+// Binary.Aligned.swift
 // Protocol for binary spaces with power-of-2 alignment requirements.
 //
 // Parallel to Quantized for geometric spaces.
@@ -9,6 +9,9 @@
 ///
 /// Aligned spaces ensure all offsets and lengths snap to alignment boundaries,
 /// which is essential for Direct I/O, memory mapping, and block device operations.
+///
+/// This protocol refines ``Memory/Aligned`` with ``Spatial`` conformance for
+/// binary address spaces.
 ///
 /// ## Mathematical Model
 ///
@@ -21,8 +24,8 @@
 ///
 /// ```swift
 /// extension Binary.Space {
-///     public enum Sector512: Aligned {
-///         public static var alignment: Binary.Alignment { .sector512 }
+///     public enum Sector512: Binary.Aligned {
+///         public static var alignment: Memory.Alignment { .sector512 }
 ///     }
 /// }
 ///
@@ -35,8 +38,5 @@
 /// Binary.Space.Sector512.alignment.alignDown(1000)  // 512
 /// ```
 extension Binary {
-    public protocol Aligned: Spatial {
-        /// The alignment requirement.
-        static var alignment: Binary.Alignment { get }
-    }
+    public protocol Aligned: Memory.Aligned, Spatial {}
 }

@@ -5,7 +5,7 @@ extension Binary {
     /// A bitmask for alignment operations (Int-based).
     ///
     /// For type-safe operations on typed positions, prefer using
-    /// `Binary.Alignment.mask<Carrier>()` or `Binary.Shift.mask<Carrier>()`
+    /// `Memory.Alignment.mask<Carrier>()` or `Memory.Shift.mask<Carrier>()`
     /// which compute masks in the carrier's ring.
     ///
     /// This type is retained for simple Int-based use cases.
@@ -49,7 +49,7 @@ extension Binary.Mask {
     ///
     /// - Precondition: `alignment.shift < Int.bitWidth`
     @inlinable
-    public init(_ alignment: Binary.Alignment) {
+    public init(_ alignment: Memory.Alignment) {
         precondition(Int(alignment.shift.rawValue) < Int.bitWidth, "Shift exceeds Int bit width")
         self.rawValue = alignment.mask(as: Int.self)
     }
@@ -60,7 +60,7 @@ extension Binary.Mask {
     ///
     /// - Precondition: `shift < Int.bitWidth`
     @inlinable
-    public init(_ shift: Binary.Shift) {
+    public init(_ shift: Memory.Shift) {
         precondition(Int(shift.rawValue) < Int.bitWidth, "Shift exceeds Int bit width")
         self.rawValue = shift.mask(as: Int.self)
     }
@@ -100,8 +100,8 @@ extension Binary.Mask {
     ///
     /// - Returns: The alignment, or `nil` if `mask + 1` is not a power of 2.
     @inlinable
-    public var alignment: Binary.Alignment? {
-        try? Binary.Alignment(rawValue + 1)
+    public var alignment: Memory.Alignment? {
+        try? Memory.Alignment(rawValue + 1)
     }
 
     /// The shift count corresponding to this mask.
@@ -109,10 +109,9 @@ extension Binary.Mask {
     /// Uses `popcount(mask)` (number of 1 bits) as the shift.
     /// This is only correct if the mask is of the form `(2^n) - 1`.
     @inlinable
-    public var shift: Binary.Shift? {
+    public var shift: Memory.Shift? {
         let count = rawValue.nonzeroBitCount
-        guard count <= Int(Binary.Shift.maxValue) else { return nil }
-        return Binary.Shift(unchecked: UInt8(count))
+        return try? Memory.Shift(count)
     }
 
     /// The inverted mask for rounding down.
