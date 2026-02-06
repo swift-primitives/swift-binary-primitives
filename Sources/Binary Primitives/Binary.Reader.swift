@@ -1,59 +1,65 @@
-// Binary.Reader.swift
-// Read-only position-tracked view with typed throws.
+// ===----------------------------------------------------------------------===//
+//
+// This source file is part of the swift-primitives open source project
+//
+// Copyright (c) 2024-2026 Coen ten Thije Boonkkamp and the swift-primitives project authors
+// Licensed under Apache License v2.0
+//
+// See LICENSE for license information
+//
+// ===----------------------------------------------------------------------===//
 
-@_spi(Internal) import Identity_Primitives
+// Binary.Reader.swift
+// Read-only position-tracked view over byte storage using Index<Storage> pattern.
+
+public import Memory_Primitives
+public import Index_Primitives
 
 extension Binary {
-    /// A read-only position-tracked view over contiguous storage.
+    /// A read-only position-tracked view over contiguous byte storage.
     ///
-    /// Uses typed throws for all validation. All index arithmetic uses
-    /// overflow-checking operations to prevent silent traps.
+    /// Uses the `Index<Storage>` pattern from index-primitives:
+    /// - `Index<Storage>` for byte positions (phantom-typed via Storage)
+    /// - `Index<Storage>.Offset` for signed displacements
+    /// - `Index<Storage>.Count` for byte counts
     ///
-    /// ## Initializer Pattern
+    /// This aligns with storage-primitives' pattern where the storage type
+    /// itself serves as the phantom tag for type safety.
     ///
-    /// - **Default**: `init(storage:)` — index at zero, throws on count conversion
-    /// - **Validated**: `init(storage:readerIndex:) throws` — validates at runtime
-    /// - **Unchecked**: `init(__unchecked:storage:readerIndex:)` — precondition only
-    ///
-    /// ## Example
+    /// ## Type Safety
     ///
     /// ```swift
-    /// // Default (reader = 0)
-    /// var reader = try Binary.Reader(storage: buffer)
+    /// var reader1 = Binary.Reader(storage: buffer1)
+    /// var reader2 = Binary.Reader(storage: buffer2)
     ///
-    /// // Validated (throws on invalid index)
-    /// var reader = try Binary.Reader(storage: buffer, readerIndex: 5)
-    ///
-    /// // Unchecked (trusted caller)
-    /// var reader = Binary.Reader(__unchecked: (), storage: buffer, readerIndex: 5)
+    /// // reader1.readerIndex == reader2.readerIndex
+    /// // ^ Compile error if buffer1 and buffer2 are different types
     /// ```
     ///
     /// ## Invariants
     ///
     /// `0 <= readerIndex <= count`
-    ///
-    /// The `count` is stored as `Storage.Scalar` and validated once at construction.
-    public struct Reader<Storage: Binary.Storage>: ~Copyable {
+    public struct Reader<Storage: Memory.Contiguous.`Protocol` & ~Copyable>: ~Copyable
+        where Storage.Element == UInt8
+    {
         /// The underlying storage.
         public let storage: Storage
 
-        /// The storage count as Scalar (computed once, validated).
+        /// The storage count (validated once at construction).
         @usableFromInline
-        internal let _count: Storage.Scalar
-
-        /// The current read position (internal storage).
-        @usableFromInline
-        internal var _readerIndex: Binary.Position<Storage.Scalar, Storage.Space>
+        internal let _count: Index<Storage>.Count
 
         /// The current read position.
+        @usableFromInline
+        internal var _readerIndex: Index<Storage>
 
-        public var readerIndex: Binary.Position<Storage.Scalar, Storage.Space> {
+        /// The current read position.
+        public var readerIndex: Index<Storage> {
             _readerIndex
         }
 
         /// The storage count.
-
-        public var count: Storage.Scalar {
+        public var count: Index<Storage>.Count {
             _count
         }
     }
@@ -65,15 +71,12 @@ extension Binary.Reader {
     /// Creates a reader over the given storage with index at zero.
     ///
     /// - Parameter storage: The underlying storage.
-    /// - Throws: `Binary.Error.overflow` if storage.count exceeds Scalar range.
-
-    public init(storage: consuming Storage) throws(Binary.Error) {
-        guard let count = Storage.Scalar(exactly: storage.count) else {
-            throw .overflow(.init(operation: .conversion, field: .count))
-        }
+    @inlinable
+    public init(storage: consuming Storage) {
+        let byteCount = storage.span.count
         self.storage = storage
-        self._count = count
-        self._readerIndex = Binary.Position(Storage.Scalar(0))
+        self._count = Index<Storage>.Count(Cardinal(UInt(byteCount)))
+        self._readerIndex = .zero
     }
 }
 
@@ -85,27 +88,22 @@ extension Binary.Reader {
     /// - Parameters:
     ///   - storage: The underlying storage.
     ///   - readerIndex: The initial reader position.
-    /// - Throws: `Binary.Error` if index violates invariants or storage.count exceeds Scalar range.
-
+    /// - Throws: `Binary.Error` if index violates invariants.
+    @inlinable
     public init(
         storage: consuming Storage,
-        readerIndex: Binary.Position<Storage.Scalar, Storage.Space>
+        readerIndex: Index<Storage>
     ) throws(Binary.Error) {
-        guard let count = Storage.Scalar(exactly: storage.count) else {
-            throw .overflow(.init(operation: .conversion, field: .count))
-        }
+        let byteCount = storage.span.count
+        let count = Index<Storage>.Count(Cardinal(UInt(byteCount)))
 
-        guard readerIndex.rawValue >= 0 else {
-            throw .negative(.init(field: .reader, value: readerIndex.rawValue))
-        }
-
-        guard readerIndex.rawValue <= count else {
+        guard readerIndex <= count else {
             throw .bounds(
                 .init(
                     field: .reader,
-                    value: readerIndex.rawValue,
-                    lower: Storage.Scalar(0),
-                    upper: count
+                    value: Int(bitPattern: readerIndex),
+                    lower: 0,
+                    upper: Int(bitPattern: count)
                 )
             )
         }
@@ -128,21 +126,19 @@ extension Binary.Reader {
     ///   - __unchecked: Marker parameter (pass `()` or omit).
     ///   - storage: The underlying storage.
     ///   - readerIndex: The initial reader position.
-    /// - Precondition: `storage.count` must fit in `Storage.Scalar`.
-    /// - Precondition: `0 <= readerIndex <= storage.count`
-
+    /// - Precondition: `0 <= readerIndex <= storage.span.count`
+    @inlinable
     public init(
         __unchecked: Void = (),
         storage: consuming Storage,
-        readerIndex: Binary.Position<Storage.Scalar, Storage.Space>? = nil
+        readerIndex: Index<Storage>? = nil
     ) {
-        let readerIndex = readerIndex ?? Binary.Position(Storage.Scalar(0))
-        let count = Storage.Scalar(exactly: storage.count)
-        precondition(count != nil, "storage.count exceeds Scalar range")
-        precondition(readerIndex.rawValue >= 0)
-        precondition(readerIndex.rawValue <= count!)
+        let byteCount = storage.span.count
+        let count = Index<Storage>.Count(Cardinal(UInt(byteCount)))
+        let readerIndex = readerIndex ?? .zero
+        precondition(readerIndex <= count)
         self.storage = storage
-        self._count = count!
+        self._count = count
         self._readerIndex = readerIndex
     }
 }
@@ -151,22 +147,24 @@ extension Binary.Reader {
 
 extension Binary.Reader {
     /// Bytes remaining to read.
-
-    public var remainingCount: Binary.Count<Storage.Scalar, Storage.Space> {
+    @inlinable
+    public var remainingCount: Index<Storage>.Count {
         // Safe: invariant guarantees count >= reader
-        Binary.Count(unchecked: _count - _readerIndex.rawValue)
+        let reader = Int(bitPattern: _readerIndex)
+        let count = Int(bitPattern: _count)
+        return Index<Storage>.Count(Cardinal(UInt(count - reader)))
     }
 
     /// Whether there are bytes remaining to read.
-
+    @inlinable
     public var hasRemaining: Bool {
-        _count > _readerIndex.rawValue
+        _readerIndex < _count
     }
 
     /// Whether the reader has consumed all bytes.
-
+    @inlinable
     public var isAtEnd: Bool {
-        _readerIndex.rawValue >= _count
+        _readerIndex >= _count
     }
 }
 
@@ -176,12 +174,16 @@ extension Binary.Reader {
     /// Move reader index by offset.
     ///
     /// - Parameter offset: The displacement to apply.
-    /// - Throws: `Binary.Error` if resulting index would be invalid or overflow occurs.
-
+    /// - Throws: `Binary.Error` if resulting index would be invalid.
+    @inlinable
     public mutating func moveReaderIndex(
-        by offset: Binary.Offset<Storage.Scalar, Storage.Space>
+        by offset: Index<Storage>.Offset
     ) throws(Binary.Error) {
-        let (newIndex, overflow) = _readerIndex.rawValue.addingReportingOverflow(offset.rawValue)
+        let currentReader = Int(bitPattern: _readerIndex)
+        let count = Int(bitPattern: _count)
+        let offsetValue = offset.rawValue.rawValue
+
+        let (newIndex, overflow) = currentReader.addingReportingOverflow(offsetValue)
 
         guard !overflow else {
             throw .overflow(.init(operation: .addition, field: .reader))
@@ -192,24 +194,24 @@ extension Binary.Reader {
                 .init(
                     field: .reader,
                     value: newIndex,
-                    lower: Storage.Scalar(0),
-                    upper: _count
+                    lower: 0,
+                    upper: count
                 )
             )
         }
 
-        guard newIndex <= _count else {
+        guard newIndex <= count else {
             throw .bounds(
                 .init(
                     field: .reader,
                     value: newIndex,
-                    lower: Storage.Scalar(0),
-                    upper: _count
+                    lower: 0,
+                    upper: count
                 )
             )
         }
 
-        _readerIndex = Binary.Position(newIndex)
+        _readerIndex = Index<Storage>(Ordinal(UInt(newIndex)))
     }
 
     /// Move reader index by offset (unchecked).
@@ -219,15 +221,18 @@ extension Binary.Reader {
     ///   - offset: The displacement to apply.
     /// - Precondition: No overflow occurs.
     /// - Precondition: Result must satisfy `0 <= readerIndex <= count`.
-
+    @inlinable
     public mutating func moveReaderIndex(
         __unchecked: Void = (),
-        by offset: Binary.Offset<Storage.Scalar, Storage.Space>
+        by offset: Index<Storage>.Offset
     ) {
-        let (newIndex, overflow) = _readerIndex.rawValue.addingReportingOverflow(offset.rawValue)
-        precondition(!overflow, "readerIndex arithmetic overflow")
-        precondition(newIndex >= 0 && newIndex <= _count)
-        _readerIndex = Binary.Position(newIndex)
+        let currentReader = Int(bitPattern: _readerIndex)
+        let count = Int(bitPattern: _count)
+        let offsetValue = offset.rawValue.rawValue
+
+        let newIndex = currentReader &+ offsetValue
+        precondition(newIndex >= 0 && newIndex <= count)
+        _readerIndex = Index<Storage>(Ordinal(UInt(newIndex)))
     }
 }
 
@@ -238,21 +243,20 @@ extension Binary.Reader {
     ///
     /// - Parameter position: The new reader position.
     /// - Throws: `Binary.Error` if position is invalid.
-
+    @inlinable
     public mutating func setReaderIndex(
-        to position: Binary.Position<Storage.Scalar, Storage.Space>
+        to position: Index<Storage>
     ) throws(Binary.Error) {
-        guard position.rawValue >= 0 else {
-            throw .negative(.init(field: .reader, value: position.rawValue))
-        }
+        let count = Int(bitPattern: _count)
+        let positionValue = Int(bitPattern: position)
 
-        guard position.rawValue <= _count else {
+        guard positionValue <= count else {
             throw .bounds(
                 .init(
                     field: .reader,
-                    value: position.rawValue,
-                    lower: Storage.Scalar(0),
-                    upper: _count
+                    value: positionValue,
+                    lower: 0,
+                    upper: count
                 )
             )
         }
@@ -266,13 +270,14 @@ extension Binary.Reader {
     ///   - __unchecked: Marker parameter (pass `()` or omit).
     ///   - position: The new reader position.
     /// - Precondition: `0 <= position <= count`.
-
+    @inlinable
     public mutating func setReaderIndex(
         __unchecked: Void = (),
-        to position: Binary.Position<Storage.Scalar, Storage.Space>
+        to position: Index<Storage>
     ) {
-        precondition(position.rawValue >= 0)
-        precondition(position.rawValue <= _count)
+        let count = Int(bitPattern: _count)
+        let positionValue = Int(bitPattern: position)
+        precondition(positionValue <= count)
         _readerIndex = position
     }
 }
@@ -281,9 +286,9 @@ extension Binary.Reader {
 
 extension Binary.Reader {
     /// Reset reader index to zero.
-
+    @inlinable
     public mutating func reset() {
-        _readerIndex = Binary.Position(Storage.Scalar(0))
+        _readerIndex = .zero
     }
 }
 
@@ -298,9 +303,9 @@ extension Binary.Reader {
     public var remainingBytes: Span<UInt8> {
         @_lifetime(borrow self)
         borrowing get {
-            let readerIdx = Int(_readerIndex.rawValue)
-            let storageCount = Int(_count)
-            return storage.bytes.extracting(readerIdx..<storageCount)
+            let readerIdx = Int(bitPattern: _readerIndex)
+            let storageCount = Int(bitPattern: _count)
+            return storage.span.extracting(readerIdx..<storageCount)
         }
     }
 
