@@ -152,6 +152,48 @@ public func >> <Tag, RawValue: FixedWidthInteger, ShiftTag>(
     Tagged(__unchecked: (), lhs.rawValue >> rhs.rawValue)
 }
 
+// MARK: - Cardinal Shift Operators
+
+// Bare FixedWidthInteger << / >> Cardinal.Protocol operators live in
+// bit-primitives (FixedWidthInteger+Cardinal.swift) — shifts are
+// ℕ-indexed endomorphisms on Word, co-located with the bit domain.
+
+/// Left shift a tagged value by a cardinal amount.
+@inlinable
+public func << <Tag, RawValue: FixedWidthInteger>(
+    lhs: Tagged<Tag, RawValue>,
+    rhs: some Cardinal.`Protocol`
+) -> Tagged<Tag, RawValue> {
+    Tagged(__unchecked: (), lhs.rawValue << rhs)
+}
+
+/// Right shift a tagged value by a cardinal amount.
+@inlinable
+public func >> <Tag, RawValue: FixedWidthInteger>(
+    lhs: Tagged<Tag, RawValue>,
+    rhs: some Cardinal.`Protocol`
+) -> Tagged<Tag, RawValue> {
+    Tagged(__unchecked: (), lhs.rawValue >> rhs)
+}
+
+/// Left shift assignment of a tagged value by a cardinal amount.
+@inlinable
+public func <<= <Tag, RawValue: FixedWidthInteger>(
+    lhs: inout Tagged<Tag, RawValue>,
+    rhs: some Cardinal.`Protocol`
+) {
+    lhs = lhs << rhs
+}
+
+/// Right shift assignment of a tagged value by a cardinal amount.
+@inlinable
+public func >>= <Tag, RawValue: FixedWidthInteger>(
+    lhs: inout Tagged<Tag, RawValue>,
+    rhs: some Cardinal.`Protocol`
+) {
+    lhs = lhs >> rhs
+}
+
 // MARK: - Compound Assignment
 
 /// Bitwise AND assignment.
