@@ -2,8 +2,6 @@
 
 import Testing
 
-import Test_Primitives
-
 @testable import Binary_Primitives
 import Binary_Primitives_Test_Support
 
