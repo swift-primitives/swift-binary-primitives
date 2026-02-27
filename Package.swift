@@ -12,10 +12,26 @@ let package = Package(
         .visionOS(.v26),
     ],
     products: [
+        // MARK: - Core
+        .library(
+            name: "Binary Primitives Core",
+            targets: ["Binary Primitives Core"]
+        ),
+        // MARK: - Variants
+        .library(
+            name: "Binary Format Primitives",
+            targets: ["Binary Format Primitives"]
+        ),
+        .library(
+            name: "Binary Serializable Primitives",
+            targets: ["Binary Serializable Primitives"]
+        ),
+        // MARK: - Umbrella
         .library(
             name: "Binary Primitives",
             targets: ["Binary Primitives"]
         ),
+        // MARK: - Test Support
         .library(
             name: "Binary Primitives Test Support",
             targets: ["Binary Primitives Test Support"]
@@ -31,18 +47,45 @@ let package = Package(
         .package(path: "../swift-standard-library-extensions"),
     ],
     targets: [
+        // MARK: - Core
         .target(
-            name: "Binary Primitives",
+            name: "Binary Primitives Core",
             dependencies: [
                 .product(name: "Bit Primitives", package: "swift-bit-primitives"),
                 .product(name: "Dimension Primitives", package: "swift-dimension-primitives"),
-                .product(name: "Formatting Primitives", package: "swift-formatting-primitives"),
                 .product(name: "Index Primitives", package: "swift-index-primitives"),
                 .product(name: "Memory Primitives", package: "swift-memory-primitives"),
-                .product(name: "Serialization Primitives", package: "swift-serialization-primitives"),
                 .product(name: "Standard Library Extensions", package: "swift-standard-library-extensions"),
             ]
         ),
+
+        // MARK: - Variants
+        .target(
+            name: "Binary Format Primitives",
+            dependencies: [
+                "Binary Primitives Core",
+                .product(name: "Formatting Primitives", package: "swift-formatting-primitives"),
+            ]
+        ),
+        .target(
+            name: "Binary Serializable Primitives",
+            dependencies: [
+                "Binary Primitives Core",
+                .product(name: "Serialization Primitives", package: "swift-serialization-primitives"),
+            ]
+        ),
+
+        // MARK: - Umbrella
+        .target(
+            name: "Binary Primitives",
+            dependencies: [
+                "Binary Primitives Core",
+                "Binary Format Primitives",
+                "Binary Serializable Primitives",
+            ]
+        ),
+
+        // MARK: - Test Support
         .target(
             name: "Binary Primitives Test Support",
             dependencies: [

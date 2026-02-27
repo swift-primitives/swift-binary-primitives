@@ -2,9 +2,9 @@
 //  exports.swift
 //  swift-binary-primitives
 //
-//  Public exports for the Binary Primitives module.
+//  Public exports for the Binary Primitives umbrella module.
 //
 
-@_exported import Bit_Primitives
-@_exported import Memory_Primitives
-@_exported import Standard_Library_Extensions
+@_exported public import Binary_Primitives_Core
+@_exported public import Binary_Format_Primitives
+@_exported public import Binary_Serializable_Primitives

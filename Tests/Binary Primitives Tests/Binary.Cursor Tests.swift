@@ -2,7 +2,7 @@
 
 import Testing
 
-@testable import Binary_Primitives
+import Binary_Primitives
 import Binary_Primitives_Test_Support
 
 // MARK: - Test Suites
@@ -24,14 +24,14 @@ extension BinaryCursorTests.Unit {
     // MARK: - Initialization
 
     @Test
-    func `init with default indices sets reader and writer to zero`() throws {
+    func `init with default indices sets reader and writer to zero`() {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
-        let cursor = try Binary.Cursor(storage: storage)
+        let cursor = Binary.Cursor(storage: storage)
 
-        #expect(cursor.readerIndex.rawValue == 0)
-        #expect(cursor.writerIndex.rawValue == 0)
-        #expect(cursor.readableCount.rawValue == 0)
-        #expect(cursor.writableCount.rawValue == 5)
+        #expect(cursor.readerIndex == 0)
+        #expect(cursor.writerIndex == 0)
+        #expect(cursor.readableCount == 0)
+        #expect(cursor.writableCount == 5)
     }
 
     @Test
@@ -39,14 +39,14 @@ extension BinaryCursorTests.Unit {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
         let cursor = try Binary.Cursor(
             storage: storage,
-            readerIndex: Binary.Position(1),
-            writerIndex: Binary.Position(4)
+            readerIndex: 1,
+            writerIndex: 4
         )
 
-        #expect(cursor.readerIndex.rawValue == 1)
-        #expect(cursor.writerIndex.rawValue == 4)
-        #expect(cursor.readableCount.rawValue == 3)
-        #expect(cursor.writableCount.rawValue == 1)
+        #expect(cursor.readerIndex == 1)
+        #expect(cursor.writerIndex == 4)
+        #expect(cursor.readableCount == 3)
+        #expect(cursor.writableCount == 1)
     }
 
     @Test
@@ -55,12 +55,12 @@ extension BinaryCursorTests.Unit {
         let cursor = Binary.Cursor(
             __unchecked: (),
             storage: storage,
-            readerIndex: Binary.Position(1),
-            writerIndex: Binary.Position(4)
+            readerIndex: 1,
+            writerIndex: 4
         )
 
-        #expect(cursor.readerIndex.rawValue == 1)
-        #expect(cursor.writerIndex.rawValue == 4)
+        #expect(cursor.readerIndex == 1)
+        #expect(cursor.writerIndex == 4)
     }
 
     // MARK: - Move Reader Index
@@ -70,13 +70,13 @@ extension BinaryCursorTests.Unit {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
         var cursor = try Binary.Cursor(
             storage: storage,
-            readerIndex: Binary.Position(0),
-            writerIndex: Binary.Position(5)
+            readerIndex: 0,
+            writerIndex: 5
         )
 
-        try cursor.moveReaderIndex(by: Binary.Offset(2))
-        #expect(cursor.readerIndex.rawValue == 2)
-        #expect(cursor.readableCount.rawValue == 3)
+        try cursor.moveReaderIndex(by: 2)
+        #expect(cursor.readerIndex == 2)
+        #expect(cursor.readableCount == 3)
     }
 
     @Test
@@ -84,12 +84,12 @@ extension BinaryCursorTests.Unit {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
         var cursor = try Binary.Cursor(
             storage: storage,
-            readerIndex: Binary.Position(0),
-            writerIndex: Binary.Position(5)
+            readerIndex: 0,
+            writerIndex: 5
         )
 
-        cursor.moveReaderIndex(__unchecked: (), by: Binary.Offset(2))
-        #expect(cursor.readerIndex.rawValue == 2)
+        cursor.moveReaderIndex(__unchecked: (), by: 2)
+        #expect(cursor.readerIndex == 2)
     }
 
     // MARK: - Move Writer Index
@@ -99,13 +99,13 @@ extension BinaryCursorTests.Unit {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
         var cursor = try Binary.Cursor(
             storage: storage,
-            readerIndex: Binary.Position(0),
-            writerIndex: Binary.Position(2)
+            readerIndex: 0,
+            writerIndex: 2
         )
 
-        try cursor.moveWriterIndex(by: Binary.Offset(2))
-        #expect(cursor.writerIndex.rawValue == 4)
-        #expect(cursor.writableCount.rawValue == 1)
+        try cursor.moveWriterIndex(by: 2)
+        #expect(cursor.writerIndex == 4)
+        #expect(cursor.writableCount == 1)
     }
 
     @Test
@@ -113,12 +113,12 @@ extension BinaryCursorTests.Unit {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
         var cursor = try Binary.Cursor(
             storage: storage,
-            readerIndex: Binary.Position(0),
-            writerIndex: Binary.Position(2)
+            readerIndex: 0,
+            writerIndex: 2
         )
 
-        cursor.moveWriterIndex(__unchecked: (), by: Binary.Offset(2))
-        #expect(cursor.writerIndex.rawValue == 4)
+        cursor.moveWriterIndex(__unchecked: (), by: 2)
+        #expect(cursor.writerIndex == 4)
     }
 
     // MARK: - Set Reader Index
@@ -128,12 +128,12 @@ extension BinaryCursorTests.Unit {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
         var cursor = try Binary.Cursor(
             storage: storage,
-            readerIndex: Binary.Position(0),
-            writerIndex: Binary.Position(5)
+            readerIndex: 0,
+            writerIndex: 5
         )
 
-        try cursor.setReaderIndex(to: Binary.Position(3))
-        #expect(cursor.readerIndex.rawValue == 3)
+        try cursor.setReaderIndex(to: 3)
+        #expect(cursor.readerIndex == 3)
     }
 
     @Test
@@ -141,12 +141,12 @@ extension BinaryCursorTests.Unit {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
         var cursor = try Binary.Cursor(
             storage: storage,
-            readerIndex: Binary.Position(0),
-            writerIndex: Binary.Position(5)
+            readerIndex: 0,
+            writerIndex: 5
         )
 
-        cursor.setReaderIndex(__unchecked: (), to: Binary.Position(3))
-        #expect(cursor.readerIndex.rawValue == 3)
+        cursor.setReaderIndex(__unchecked: (), to: 3)
+        #expect(cursor.readerIndex == 3)
     }
 
     // MARK: - Set Writer Index
@@ -156,12 +156,12 @@ extension BinaryCursorTests.Unit {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
         var cursor = try Binary.Cursor(
             storage: storage,
-            readerIndex: Binary.Position(0),
-            writerIndex: Binary.Position(2)
+            readerIndex: 0,
+            writerIndex: 2
         )
 
-        try cursor.setWriterIndex(to: Binary.Position(4))
-        #expect(cursor.writerIndex.rawValue == 4)
+        try cursor.setWriterIndex(to: 4)
+        #expect(cursor.writerIndex == 4)
     }
 
     @Test
@@ -169,12 +169,12 @@ extension BinaryCursorTests.Unit {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
         var cursor = try Binary.Cursor(
             storage: storage,
-            readerIndex: Binary.Position(0),
-            writerIndex: Binary.Position(2)
+            readerIndex: 0,
+            writerIndex: 2
         )
 
-        cursor.setWriterIndex(__unchecked: (), to: Binary.Position(4))
-        #expect(cursor.writerIndex.rawValue == 4)
+        cursor.setWriterIndex(__unchecked: (), to: 4)
+        #expect(cursor.writerIndex == 4)
     }
 
     // MARK: - Reset
@@ -184,13 +184,13 @@ extension BinaryCursorTests.Unit {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
         var cursor = try Binary.Cursor(
             storage: storage,
-            readerIndex: Binary.Position(2),
-            writerIndex: Binary.Position(4)
+            readerIndex: 2,
+            writerIndex: 4
         )
 
         cursor.reset()
-        #expect(cursor.readerIndex.rawValue == 0)
-        #expect(cursor.writerIndex.rawValue == 0)
+        #expect(cursor.readerIndex == 0)
+        #expect(cursor.writerIndex == 0)
     }
 
     // MARK: - Readable/Writable Checks
@@ -200,8 +200,8 @@ extension BinaryCursorTests.Unit {
         let storage: [UInt8] = [1, 2, 3]
         let cursor = try Binary.Cursor(
             storage: storage,
-            readerIndex: Binary.Position(0),
-            writerIndex: Binary.Position(3)
+            readerIndex: 0,
+            writerIndex: 3
         )
 
         #expect(cursor.isReadable == true)
@@ -212,8 +212,8 @@ extension BinaryCursorTests.Unit {
         let storage: [UInt8] = [1, 2, 3]
         let cursor = try Binary.Cursor(
             storage: storage,
-            readerIndex: Binary.Position(3),
-            writerIndex: Binary.Position(3)
+            readerIndex: 3,
+            writerIndex: 3
         )
 
         #expect(cursor.isReadable == false)
@@ -224,8 +224,8 @@ extension BinaryCursorTests.Unit {
         let storage: [UInt8] = [1, 2, 3]
         let cursor = try Binary.Cursor(
             storage: storage,
-            readerIndex: Binary.Position(0),
-            writerIndex: Binary.Position(1)
+            readerIndex: 0,
+            writerIndex: 1
         )
 
         #expect(cursor.isWritable == true)
@@ -236,8 +236,8 @@ extension BinaryCursorTests.Unit {
         let storage: [UInt8] = [1, 2, 3]
         let cursor = try Binary.Cursor(
             storage: storage,
-            readerIndex: Binary.Position(0),
-            writerIndex: Binary.Position(3)
+            readerIndex: 0,
+            writerIndex: 3
         )
 
         #expect(cursor.isWritable == false)
@@ -250,8 +250,8 @@ extension BinaryCursorTests.Unit {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
         let cursor = try Binary.Cursor(
             storage: storage,
-            readerIndex: Binary.Position(1),
-            writerIndex: Binary.Position(4)
+            readerIndex: 1,
+            writerIndex: 4
         )
 
         unsafe cursor.withReadableBytes { ptr in
@@ -268,27 +268,14 @@ extension BinaryCursorTests.Unit {
 extension BinaryCursorTests.EdgeCase {
 
     @Test
-    func `init throws on negative reader index`() {
-        let storage: [UInt8] = [1, 2, 3]
-
-        #expect(throws: Binary.Error.self) {
-            _ = try Binary.Cursor(
-                storage: storage,
-                readerIndex: Binary.Position(-1),
-                writerIndex: Binary.Position(3)
-            )
-        }
-    }
-
-    @Test
     func `init throws when reader exceeds writer`() {
         let storage: [UInt8] = [1, 2, 3]
 
         #expect(throws: Binary.Error.self) {
             _ = try Binary.Cursor(
                 storage: storage,
-                readerIndex: Binary.Position(2),
-                writerIndex: Binary.Position(1)
+                readerIndex: 2,
+                writerIndex: 1
             )
         }
     }
@@ -300,8 +287,8 @@ extension BinaryCursorTests.EdgeCase {
         #expect(throws: Binary.Error.self) {
             _ = try Binary.Cursor(
                 storage: storage,
-                readerIndex: Binary.Position(0),
-                writerIndex: Binary.Position(10)
+                readerIndex: 0,
+                writerIndex: 10
             )
         }
     }
@@ -311,12 +298,12 @@ extension BinaryCursorTests.EdgeCase {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
         var cursor = try Binary.Cursor(
             storage: storage,
-            readerIndex: Binary.Position(0),
-            writerIndex: Binary.Position(3)
+            readerIndex: 0,
+            writerIndex: 3
         )
 
         #expect(throws: Binary.Error.self) {
-            try cursor.moveReaderIndex(by: Binary.Offset(5))
+            try cursor.moveReaderIndex(by: 5)
         }
     }
 
@@ -325,12 +312,12 @@ extension BinaryCursorTests.EdgeCase {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
         var cursor = try Binary.Cursor(
             storage: storage,
-            readerIndex: Binary.Position(0),
-            writerIndex: Binary.Position(3)
+            readerIndex: 0,
+            writerIndex: 3
         )
 
         #expect(throws: Binary.Error.self) {
-            try cursor.moveWriterIndex(by: Binary.Offset(10))
+            try cursor.moveWriterIndex(by: 10)
         }
     }
 
@@ -341,8 +328,8 @@ extension BinaryCursorTests.EdgeCase {
         let storage: [UInt8] = [1, 2, 3]
         let cursor = try Binary.Cursor(
             storage: storage,
-            readerIndex: Binary.Position(0),
-            writerIndex: Binary.Position(3)
+            readerIndex: 0,
+            writerIndex: 3
         )
 
         #expect(throws: TestError.expected) {

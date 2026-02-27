@@ -2,7 +2,7 @@
 
 import Testing
 
-@testable import Binary_Primitives
+import Binary_Primitives
 import Binary_Primitives_Test_Support
 
 // MARK: - Test Suites
@@ -24,30 +24,30 @@ extension BinaryReaderTests.Unit {
     // MARK: - Initialization
 
     @Test
-    func `init with default index sets reader to zero`() throws {
+    func `init with default index sets reader to zero`() {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
-        let reader = try Binary.Reader(storage: storage)
+        let reader = Binary.Reader(storage: storage)
 
-        #expect(reader.readerIndex.rawValue == 0)
-        #expect(reader.remainingCount.rawValue == 5)
+        #expect(reader.readerIndex == 0)
+        #expect(reader.remainingCount == 5)
     }
 
     @Test
     func `init with custom index preserves position`() throws {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
-        let reader = try Binary.Reader(storage: storage, readerIndex: Binary.Position(2))
+        let reader = try Binary.Reader(storage: storage, readerIndex: 2)
 
-        #expect(reader.readerIndex.rawValue == 2)
-        #expect(reader.remainingCount.rawValue == 3)
+        #expect(reader.readerIndex == 2)
+        #expect(reader.remainingCount == 3)
     }
 
     @Test
     func `init unchecked bypasses validation`() {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
-        let reader = Binary.Reader(__unchecked: (), storage: storage, readerIndex: Binary.Position(2))
+        let reader = Binary.Reader(__unchecked: (), storage: storage, readerIndex: 2)
 
-        #expect(reader.readerIndex.rawValue == 2)
-        #expect(reader.remainingCount.rawValue == 3)
+        #expect(reader.readerIndex == 2)
+        #expect(reader.remainingCount == 3)
     }
 
     // MARK: - Move Reader Index
@@ -55,30 +55,30 @@ extension BinaryReaderTests.Unit {
     @Test
     func `moveReaderIndex advances reader by offset`() throws {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
-        var reader = try Binary.Reader(storage: storage)
+        var reader = Binary.Reader(storage: storage)
 
-        try reader.moveReaderIndex(by: Binary.Offset(3))
-        #expect(reader.readerIndex.rawValue == 3)
-        #expect(reader.remainingCount.rawValue == 2)
+        try reader.moveReaderIndex(by: 3)
+        #expect(reader.readerIndex == 3)
+        #expect(reader.remainingCount == 2)
     }
 
     @Test
     func `moveReaderIndex allows negative offset for rewind`() throws {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
-        var reader = try Binary.Reader(storage: storage, readerIndex: Binary.Position(3))
+        var reader = try Binary.Reader(storage: storage, readerIndex: 3)
 
-        try reader.moveReaderIndex(by: Binary.Offset(-2))
-        #expect(reader.readerIndex.rawValue == 1)
-        #expect(reader.remainingCount.rawValue == 4)
+        try reader.moveReaderIndex(by: -2)
+        #expect(reader.readerIndex == 1)
+        #expect(reader.remainingCount == 4)
     }
 
     @Test
-    func `moveReaderIndex unchecked advances reader`() throws {
+    func `moveReaderIndex unchecked advances reader`() {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
-        var reader = try Binary.Reader(storage: storage)
+        var reader = Binary.Reader(storage: storage)
 
-        reader.moveReaderIndex(__unchecked: (), by: Binary.Offset(3))
-        #expect(reader.readerIndex.rawValue == 3)
+        reader.moveReaderIndex(__unchecked: (), by: 3)
+        #expect(reader.readerIndex == 3)
     }
 
     // MARK: - Set Reader Index
@@ -86,20 +86,20 @@ extension BinaryReaderTests.Unit {
     @Test
     func `setReaderIndex sets absolute position`() throws {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
-        var reader = try Binary.Reader(storage: storage)
+        var reader = Binary.Reader(storage: storage)
 
-        try reader.setReaderIndex(to: Binary.Position(4))
-        #expect(reader.readerIndex.rawValue == 4)
-        #expect(reader.remainingCount.rawValue == 1)
+        try reader.setReaderIndex(to: 4)
+        #expect(reader.readerIndex == 4)
+        #expect(reader.remainingCount == 1)
     }
 
     @Test
-    func `setReaderIndex unchecked sets position`() throws {
+    func `setReaderIndex unchecked sets position`() {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
-        var reader = try Binary.Reader(storage: storage)
+        var reader = Binary.Reader(storage: storage)
 
-        reader.setReaderIndex(__unchecked: (), to: Binary.Position(4))
-        #expect(reader.readerIndex.rawValue == 4)
+        reader.setReaderIndex(__unchecked: (), to: 4)
+        #expect(reader.readerIndex == 4)
     }
 
     // MARK: - Reset
@@ -107,19 +107,19 @@ extension BinaryReaderTests.Unit {
     @Test
     func `reset clears reader index to zero`() throws {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
-        var reader = try Binary.Reader(storage: storage, readerIndex: Binary.Position(3))
+        var reader = try Binary.Reader(storage: storage, readerIndex: 3)
 
         reader.reset()
-        #expect(reader.readerIndex.rawValue == 0)
-        #expect(reader.remainingCount.rawValue == 5)
+        #expect(reader.readerIndex == 0)
+        #expect(reader.remainingCount == 5)
     }
 
     // MARK: - Convenience Properties
 
     @Test
-    func `hasRemaining returns true when bytes available`() throws {
+    func `hasRemaining returns true when bytes available`() {
         let storage: [UInt8] = [1, 2, 3]
-        let reader = try Binary.Reader(storage: storage)
+        let reader = Binary.Reader(storage: storage)
 
         #expect(reader.hasRemaining == true)
     }
@@ -127,7 +127,7 @@ extension BinaryReaderTests.Unit {
     @Test
     func `hasRemaining returns false at end`() throws {
         let storage: [UInt8] = [1, 2, 3]
-        let reader = try Binary.Reader(storage: storage, readerIndex: Binary.Position(3))
+        let reader = try Binary.Reader(storage: storage, readerIndex: 3)
 
         #expect(reader.hasRemaining == false)
     }
@@ -135,15 +135,15 @@ extension BinaryReaderTests.Unit {
     @Test
     func `isAtEnd returns true at end`() throws {
         let storage: [UInt8] = [1, 2, 3]
-        let reader = try Binary.Reader(storage: storage, readerIndex: Binary.Position(3))
+        let reader = try Binary.Reader(storage: storage, readerIndex: 3)
 
         #expect(reader.isAtEnd == true)
     }
 
     @Test
-    func `isAtEnd returns false when bytes remain`() throws {
+    func `isAtEnd returns false when bytes remain`() {
         let storage: [UInt8] = [1, 2, 3]
-        let reader = try Binary.Reader(storage: storage)
+        let reader = Binary.Reader(storage: storage)
 
         #expect(reader.isAtEnd == false)
     }
@@ -153,7 +153,7 @@ extension BinaryReaderTests.Unit {
     @Test
     func `withRemainingBytes provides correct slice`() throws {
         let storage: [UInt8] = [1, 2, 3, 4, 5]
-        let reader = try Binary.Reader(storage: storage, readerIndex: Binary.Position(2))
+        let reader = try Binary.Reader(storage: storage, readerIndex: 2)
 
         unsafe reader.withRemainingBytes { ptr in
             #expect(ptr.count == 3)
@@ -166,7 +166,7 @@ extension BinaryReaderTests.Unit {
     @Test
     func `withRemainingBytes returns empty for exhausted reader`() throws {
         let storage: [UInt8] = [1, 2, 3]
-        let reader = try Binary.Reader(storage: storage, readerIndex: Binary.Position(3))
+        let reader = try Binary.Reader(storage: storage, readerIndex: 3)
 
         unsafe reader.withRemainingBytes { ptr in
             #expect(ptr.isEmpty)
@@ -176,9 +176,9 @@ extension BinaryReaderTests.Unit {
     // MARK: - Storage Access
 
     @Test
-    func `storage property provides access to underlying data`() throws {
+    func `storage property provides access to underlying data`() {
         let storage: [UInt8] = [10, 20, 30]
-        let reader = try Binary.Reader(storage: storage)
+        let reader = Binary.Reader(storage: storage)
 
         #expect(reader.storage.count == 3)
         #expect(reader.storage[0] == 10)
@@ -190,41 +190,31 @@ extension BinaryReaderTests.Unit {
 extension BinaryReaderTests.EdgeCase {
 
     @Test
-    func `moveReaderIndex throws on overflow`() throws {
+    func `moveReaderIndex throws on out of bounds`() {
         let storage: [UInt8] = [1, 2, 3]
-        var reader = try Binary.Reader(storage: storage)
+        var reader = Binary.Reader(storage: storage)
 
         #expect(throws: Binary.Error.self) {
-            try reader.moveReaderIndex(by: Binary.Offset(Int.max))
+            try reader.moveReaderIndex(by: 10)
         }
     }
 
     @Test
-    func `moveReaderIndex throws on out of bounds`() throws {
+    func `setReaderIndex throws on out of bounds`() {
         let storage: [UInt8] = [1, 2, 3]
-        var reader = try Binary.Reader(storage: storage)
+        var reader = Binary.Reader(storage: storage)
 
         #expect(throws: Binary.Error.self) {
-            try reader.moveReaderIndex(by: Binary.Offset(10))
+            try reader.setReaderIndex(to: 10)
         }
     }
 
     @Test
-    func `setReaderIndex throws on negative`() throws {
-        let storage: [UInt8] = [1, 2, 3]
-        var reader = try Binary.Reader(storage: storage)
-
-        #expect(throws: Binary.Error.self) {
-            try reader.setReaderIndex(to: Binary.Position(-1))
-        }
-    }
-
-    @Test
-    func `withRemainingBytes propagates typed error`() throws {
+    func `withRemainingBytes propagates typed error`() {
         enum TestError: Error { case expected }
 
         let storage: [UInt8] = [1, 2, 3]
-        let reader = try Binary.Reader(storage: storage)
+        let reader = Binary.Reader(storage: storage)
 
         #expect(throws: TestError.expected) {
             try unsafe reader.withRemainingBytes { (_: UnsafeRawBufferPointer) throws(TestError) in
