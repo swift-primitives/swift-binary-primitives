@@ -12,7 +12,7 @@
 //     ///   - bytes: Collection of bytes representing the integer
 //     ///   - endianness: Byte order of the input bytes (defaults to little-endian)
 //     /// - Returns: Integer decoded from bytes, or nil if byte count doesn't match size
-//     public init?<C: Collection>(bytes: C, endianness: Binary.Endianness = .little)
+//     public init?<C: Swift.Collection>(bytes: C, endianness: Binary.Endianness = .little)
 //     where C.Element == UInt8 {
 //         guard bytes.count == MemoryLayout<Self>.size else { return nil }
 //         let byteArray: [UInt8] = .init(bytes)
