@@ -43,7 +43,7 @@ let package = Package(
         .package(path: "../swift-formatting-primitives"),
         .package(path: "../swift-index-primitives"),
         .package(path: "../swift-memory-primitives"),
-        .package(path: "../swift-serialization-primitives"),
+        .package(path: "../swift-serializer-primitives"),
         .package(path: "../swift-standard-library-extensions"),
     ],
     targets: [
@@ -71,7 +71,7 @@ let package = Package(
             name: "Binary Serializable Primitives",
             dependencies: [
                 "Binary Primitives Core",
-                .product(name: "Serialization Primitives", package: "swift-serialization-primitives"),
+                .product(name: "Serialization Primitives", package: "swift-serializer-primitives"),
             ]
         ),
 
