@@ -1,4 +1,11 @@
 # Swift Strict Memory Safety: Comprehensive Overview
+<!--
+---
+version: 1.0.0
+last_updated: 2026-01-15
+status: COMPLETE
+---
+-->
 
 > A PhD-level reference document on Swift's strict memory safety features, based on SE-0458 and related proposals.
 
