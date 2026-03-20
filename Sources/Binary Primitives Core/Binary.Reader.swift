@@ -181,7 +181,7 @@ extension Binary.Reader {
     ) throws(Binary.Error) {
         let currentReader = Int(bitPattern: _readerIndex)
         let count = Int(bitPattern: _count)
-        let offsetValue = offset.rawValue.rawValue
+        let offsetValue = Int(bitPattern: offset)
 
         let (newIndex, overflow) = currentReader.addingReportingOverflow(offsetValue)
 
@@ -228,7 +228,7 @@ extension Binary.Reader {
     ) {
         let currentReader = Int(bitPattern: _readerIndex)
         let count = Int(bitPattern: _count)
-        let offsetValue = offset.rawValue.rawValue
+        let offsetValue = Int(bitPattern: offset)
 
         let newIndex = currentReader &+ offsetValue
         precondition(newIndex >= 0 && newIndex <= count)

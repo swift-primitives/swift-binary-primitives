@@ -218,7 +218,7 @@ extension Binary.Cursor {
     ) throws(Binary.Error) {
         let currentReader = Int(bitPattern: _readerIndex)
         let currentWriter = Int(bitPattern: _writerIndex)
-        let offsetValue = offset.rawValue.rawValue
+        let offsetValue = Int(bitPattern: offset)
 
         let (newIndex, overflow) = currentReader.addingReportingOverflow(offsetValue)
 
@@ -264,7 +264,7 @@ extension Binary.Cursor {
     ) {
         let currentReader = Int(bitPattern: _readerIndex)
         let currentWriter = Int(bitPattern: _writerIndex)
-        let offsetValue = offset.rawValue.rawValue
+        let offsetValue = Int(bitPattern: offset)
 
         let newIndex = currentReader &+ offsetValue
         precondition(newIndex >= 0 && newIndex <= currentWriter)
@@ -286,7 +286,7 @@ extension Binary.Cursor {
         let currentReader = Int(bitPattern: _readerIndex)
         let currentWriter = Int(bitPattern: _writerIndex)
         let count = Int(bitPattern: _count)
-        let offsetValue = offset.rawValue.rawValue
+        let offsetValue = Int(bitPattern: offset)
 
         let (newIndex, overflow) = currentWriter.addingReportingOverflow(offsetValue)
 
@@ -333,7 +333,7 @@ extension Binary.Cursor {
         let currentReader = Int(bitPattern: _readerIndex)
         let currentWriter = Int(bitPattern: _writerIndex)
         let count = Int(bitPattern: _count)
-        let offsetValue = offset.rawValue.rawValue
+        let offsetValue = Int(bitPattern: offset)
 
         let newIndex = currentWriter &+ offsetValue
         precondition(newIndex >= currentReader && newIndex <= count)
