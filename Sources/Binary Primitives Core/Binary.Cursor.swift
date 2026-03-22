@@ -13,7 +13,7 @@
 // Position-tracked view over byte storage using Index<Storage> pattern.
 
 public import Memory_Primitives
-public import Index_Primitives
+internal import Index_Primitives
 
 extension Binary {
     /// A position-tracked view over mutable contiguous byte storage.
