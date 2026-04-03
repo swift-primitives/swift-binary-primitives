@@ -17,6 +17,14 @@ let package = Package(
             name: "Binary Primitives Core",
             targets: ["Binary Primitives Core"]
         ),
+        .library(
+            name: "Binary Cursor Primitives",
+            targets: ["Binary Cursor Primitives"]
+        ),
+        .library(
+            name: "Binary LEB128 Primitives",
+            targets: ["Binary LEB128 Primitives"]
+        ),
         // MARK: - Variants
         .library(
             name: "Binary Format Primitives",
@@ -59,6 +67,22 @@ let package = Package(
             ]
         ),
 
+        // MARK: - Cursor
+        .target(
+            name: "Binary Cursor Primitives",
+            dependencies: [
+                "Binary Primitives Core",
+            ]
+        ),
+
+        // MARK: - LEB128
+        .target(
+            name: "Binary LEB128 Primitives",
+            dependencies: [
+                "Binary Primitives Core",
+            ]
+        ),
+
         // MARK: - Variants
         .target(
             name: "Binary Format Primitives",
@@ -80,6 +104,8 @@ let package = Package(
             name: "Binary Primitives",
             dependencies: [
                 "Binary Primitives Core",
+                "Binary Cursor Primitives",
+                "Binary LEB128 Primitives",
                 "Binary Format Primitives",
                 "Binary Serializable Primitives",
             ]
