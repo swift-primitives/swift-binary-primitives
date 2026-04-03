@@ -29,7 +29,7 @@ extension Binary.Format {
         @usableFromInline
         let showPrefix: Bool
 
-        public let signStrategy: SignDisplayStrategy
+        public let signStrategy: Sign.Display
         public let minWidth: Int?
 
         @usableFromInline
@@ -37,7 +37,7 @@ extension Binary.Format {
             radix: Int,
             prefix: String,
             showPrefix: Bool = false,
-            signStrategy: SignDisplayStrategy = .automatic,
+            signStrategy: Sign.Display = .automatic,
             minWidth: Int? = nil
         ) {
             self.radix = radix
@@ -47,7 +47,7 @@ extension Binary.Format {
             self.minWidth = minWidth
         }
 
-        public init(signStrategy: SignDisplayStrategy = .automatic, minWidth: Int? = nil) {
+        public init(signStrategy: Sign.Display = .automatic, minWidth: Int? = nil) {
             self.radix = 10
             self.prefixString = ""
             self.showPrefix = false
@@ -57,9 +57,14 @@ extension Binary.Format {
     }
 }
 
-// MARK: - SignDisplayStrategy
+// MARK: - Sign.Display
 
 extension Binary.Format.Radix {
+    /// Sign display namespace.
+    public enum Sign {}
+}
+
+extension Binary.Format.Radix.Sign {
     /// Strategy controlling sign display for formatted integers.
     ///
     /// Determines whether to show plus signs for positive numbers,
@@ -71,7 +76,7 @@ extension Binary.Format.Radix {
     /// 42.formatted(Binary.Format.decimal.sign(.always))    // "+42"
     /// (-5).formatted(Binary.Format.decimal.sign(.always))  // "-5"
     /// ```
-    public struct SignDisplayStrategy: Sendable {
+    public struct Display: Sendable {
         @usableFromInline
         let _shouldAlwaysShowSign: @Sendable () -> Bool
 
@@ -87,9 +92,9 @@ extension Binary.Format.Radix {
     }
 }
 
-// MARK: - SignDisplayStrategy Static Properties
+// MARK: - Sign.Display Static Properties
 
-extension Binary.Format.Radix.SignDisplayStrategy {
+extension Binary.Format.Radix.Sign.Display {
     /// Displays minus sign for negatives only, no sign for positives.
     @inlinable
     public static var automatic: Self {
@@ -225,7 +230,7 @@ extension Binary.Format.Radix {
     /// (-42).formatted(Binary.Format.decimal.sign(.always))  // "-42"
     /// ```
     @inlinable
-    public func sign(_ strategy: SignDisplayStrategy) -> Self {
+    public func sign(_ strategy: Sign.Display) -> Self {
         .init(
             radix: radix,
             prefix: prefixString,
