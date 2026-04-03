@@ -62,7 +62,7 @@ let package = Package(
                 .product(name: "Bit Primitives", package: "swift-bit-primitives"),
                 .product(name: "Dimension Primitives", package: "swift-dimension-primitives"),
                 .product(name: "Index Primitives", package: "swift-index-primitives"),
-                .product(name: "Memory Primitives", package: "swift-memory-primitives"),
+                .product(name: "Memory Primitives Core", package: "swift-memory-primitives"),
                 .product(name: "Standard Library Extensions", package: "swift-standard-library-extensions"),
             ]
         ),
