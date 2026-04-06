@@ -595,7 +595,7 @@ The codebase already contains a sophisticated parsing infrastructure:
 public protocol Parser<Input, Output, Failure> {
     associatedtype Input
     associatedtype Output
-    associatedtype Failure: Swift.Error & Sendable
+    associatedtype Failure: Swift.Error
 
     func parse(_ input: inout Input) throws(Failure) -> Output
 }
