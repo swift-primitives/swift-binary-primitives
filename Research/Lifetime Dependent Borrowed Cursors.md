@@ -1,4 +1,11 @@
 # Lifetime-Dependent Borrowed Cursors in Swift: A Comprehensive Analysis of Non-Escapable Types, Closure Integration Gaps, and the Non-Closure Runner Surface
+<!--
+---
+version: 1.0.0
+last_updated: 2026-01-19
+status: RECOMMENDATION
+---
+-->
 
 **A Technical Research Paper on Safe Zero-Copy Parsing APIs**
 
@@ -588,7 +595,7 @@ The codebase already contains a sophisticated parsing infrastructure:
 public protocol Parser<Input, Output, Failure> {
     associatedtype Input
     associatedtype Output
-    associatedtype Failure: Swift.Error & Sendable
+    associatedtype Failure: Swift.Error
 
     func parse(_ input: inout Input) throws(Failure) -> Output
 }

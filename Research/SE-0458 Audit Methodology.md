@@ -1,4 +1,11 @@
 # SE-0458 Strict Memory Safety: Audit Methodology
+<!--
+---
+version: 1.0.0
+last_updated: 2026-01-15
+status: COMPLETE
+---
+-->
 
 > A comprehensive reference for auditing Swift packages against SE-0458 strict memory safety standards.
 > This document is self-contained and can be used by any agent to perform a strict memory safety audit.

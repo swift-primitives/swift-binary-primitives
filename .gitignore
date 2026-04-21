@@ -1,6 +1,5 @@
 # ========== CANONICAL (auto-synced, do not edit) ==========
-# Source: swift-institute
-# Sync: Scripts/sync-gitignore.sh or manual
+# Source: swift-institute/Scripts/sync-gitignore.sh
 
 *~
 .DS_Store
@@ -24,11 +23,14 @@ Thumbs.db
 /*
 !/Sources/
 !/Tests/
+!/Benchmarks/
 !/Experiments/
 !/Research/
+!/Skills/
 !/.github/
 !/Package.swift
 !/LICENSE.md
+!/README.md
 
 # Documentation (opt-in for whitelisted .md files and .docc catalogs only)
 # Blocks all .md files by default to prevent AI-generated content from being committed
@@ -39,8 +41,22 @@ Thumbs.db
 !CONTRIBUTING.md
 !CODE_OF_CONDUCT.md
 !SECURITY.md
+!CLAUDE.md
 !**/*.docc/**/*.md
 !**/Research/**/*.md
+!**/Experiments/**/*.md
+!**/Skills/**/*.md
+
+# Package insights are non-normative working logs accumulating through
+# reflections-processing. They stay on disk for the author but do not ship.
+**/_Package-Insights.md
+
+# Research working-artifact prevention: underscore-prefixed and prompt dirs
+# are non-canonical and must not ship. _archived/ is the one allowed
+# exception (holds SUPERSEDED research per [META-005]).
+/Research/_*/
+!/Research/_archived/
+/Research/prompts/
 
 *.pdf
 
@@ -50,9 +66,10 @@ Thumbs.db
 # Swift Package Manager
 .build/
 .swiftpm/
+.benchmarks/
 
 # ========== END CANONICAL ==========
 
 # ========== LOCAL OVERRIDES ==========
-# Package-specific rules below (preserved during sync)
+# Package-specific rules below (managed by sync-gitignore.sh)
 

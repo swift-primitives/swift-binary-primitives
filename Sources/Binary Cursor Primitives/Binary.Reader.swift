@@ -12,8 +12,8 @@
 // Binary.Reader.swift
 // Read-only position-tracked view over byte storage using Index<Storage> pattern.
 
-public import Memory_Primitives
-public import Index_Primitives
+public import Memory_Primitives_Core
+internal import Index_Primitives
 
 extension Binary {
     /// A read-only position-tracked view over contiguous byte storage.
@@ -181,7 +181,7 @@ extension Binary.Reader {
     ) throws(Binary.Error) {
         let currentReader = Int(bitPattern: _readerIndex)
         let count = Int(bitPattern: _count)
-        let offsetValue = offset.rawValue.rawValue
+        let offsetValue = Int(bitPattern: offset)
 
         let (newIndex, overflow) = currentReader.addingReportingOverflow(offsetValue)
 
@@ -228,7 +228,7 @@ extension Binary.Reader {
     ) {
         let currentReader = Int(bitPattern: _readerIndex)
         let count = Int(bitPattern: _count)
-        let offsetValue = offset.rawValue.rawValue
+        let offsetValue = Int(bitPattern: offset)
 
         let newIndex = currentReader &+ offsetValue
         precondition(newIndex >= 0 && newIndex <= count)

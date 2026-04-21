@@ -1,4 +1,4 @@
-// swift-tools-version: 6.2
+// swift-tools-version: 6.3
 
 import PackageDescription
 
@@ -12,10 +12,23 @@ let package = Package(
         .visionOS(.v26),
     ],
     products: [
+        // MARK: - Namespace
+        .library(
+            name: "Binary Namespace",
+            targets: ["Binary Namespace"]
+        ),
         // MARK: - Core
         .library(
             name: "Binary Primitives Core",
             targets: ["Binary Primitives Core"]
+        ),
+        .library(
+            name: "Binary Cursor Primitives",
+            targets: ["Binary Cursor Primitives"]
+        ),
+        .library(
+            name: "Binary LEB128 Primitives",
+            targets: ["Binary LEB128 Primitives"]
         ),
         // MARK: - Variants
         .library(
@@ -43,19 +56,42 @@ let package = Package(
         .package(path: "../swift-formatting-primitives"),
         .package(path: "../swift-index-primitives"),
         .package(path: "../swift-memory-primitives"),
-        .package(path: "../swift-serialization-primitives"),
+        .package(path: "../swift-serializer-primitives"),
         .package(path: "../swift-standard-library-extensions"),
     ],
     targets: [
+        // MARK: - Namespace
+        .target(
+            name: "Binary Namespace",
+            dependencies: []
+        ),
+
         // MARK: - Core
         .target(
             name: "Binary Primitives Core",
             dependencies: [
+                "Binary Namespace",
                 .product(name: "Bit Primitives", package: "swift-bit-primitives"),
                 .product(name: "Dimension Primitives", package: "swift-dimension-primitives"),
                 .product(name: "Index Primitives", package: "swift-index-primitives"),
-                .product(name: "Memory Primitives", package: "swift-memory-primitives"),
+                .product(name: "Memory Primitives Core", package: "swift-memory-primitives"),
                 .product(name: "Standard Library Extensions", package: "swift-standard-library-extensions"),
+            ]
+        ),
+
+        // MARK: - Cursor
+        .target(
+            name: "Binary Cursor Primitives",
+            dependencies: [
+                "Binary Primitives Core",
+            ]
+        ),
+
+        // MARK: - LEB128
+        .target(
+            name: "Binary LEB128 Primitives",
+            dependencies: [
+                "Binary Primitives Core",
             ]
         ),
 
@@ -71,7 +107,7 @@ let package = Package(
             name: "Binary Serializable Primitives",
             dependencies: [
                 "Binary Primitives Core",
-                .product(name: "Serialization Primitives", package: "swift-serialization-primitives"),
+                .product(name: "Serialization Primitives", package: "swift-serializer-primitives"),
             ]
         ),
 
@@ -79,7 +115,10 @@ let package = Package(
         .target(
             name: "Binary Primitives",
             dependencies: [
+                "Binary Namespace",
                 "Binary Primitives Core",
+                "Binary Cursor Primitives",
+                "Binary LEB128 Primitives",
                 "Binary Format Primitives",
                 "Binary Serializable Primitives",
             ]
@@ -113,9 +152,11 @@ for target in package.targets where ![.system, .binary, .plugin, .macro].contain
         .enableUpcomingFeature("InternalImportsByDefault"),
         .enableUpcomingFeature("MemberImportVisibility"),
         .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
+        .enableExperimentalFeature("LifetimeDependence"),
         .enableExperimentalFeature("Lifetimes"),
         .enableExperimentalFeature("SuppressedAssociatedTypes"),
-        .enableExperimentalFeature("SuppressedAssociatedTypesWithDefaults"),
+        .enableUpcomingFeature("InferIsolatedConformances"),
+        .enableUpcomingFeature("LifetimeDependence"),
     ]
 
     let package: [SwiftSetting] = []

@@ -1,4 +1,11 @@
 # Strict Memory Safety Audit Template
+<!--
+---
+version: 1.0.0
+last_updated: 2026-01-15
+status: COMPLETE
+---
+-->
 
 > Reusable methodology for auditing Swift packages against SE-0458 strict memory safety standards.
 
