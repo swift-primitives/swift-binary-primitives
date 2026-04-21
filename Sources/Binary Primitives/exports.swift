@@ -6,5 +6,7 @@
 //
 
 @_exported public import Binary_Primitives_Core
+@_exported public import Binary_Cursor_Primitives
+@_exported public import Binary_LEB128_Primitives
 @_exported public import Binary_Format_Primitives
 @_exported public import Binary_Serializable_Primitives
