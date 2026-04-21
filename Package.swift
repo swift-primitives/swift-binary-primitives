@@ -12,6 +12,11 @@ let package = Package(
         .visionOS(.v26),
     ],
     products: [
+        // MARK: - Namespace
+        .library(
+            name: "Binary Namespace",
+            targets: ["Binary Namespace"]
+        ),
         // MARK: - Core
         .library(
             name: "Binary Primitives Core",
@@ -55,10 +60,17 @@ let package = Package(
         .package(path: "../swift-standard-library-extensions"),
     ],
     targets: [
+        // MARK: - Namespace
+        .target(
+            name: "Binary Namespace",
+            dependencies: []
+        ),
+
         // MARK: - Core
         .target(
             name: "Binary Primitives Core",
             dependencies: [
+                "Binary Namespace",
                 .product(name: "Bit Primitives", package: "swift-bit-primitives"),
                 .product(name: "Dimension Primitives", package: "swift-dimension-primitives"),
                 .product(name: "Index Primitives", package: "swift-index-primitives"),
@@ -103,6 +115,7 @@ let package = Package(
         .target(
             name: "Binary Primitives",
             dependencies: [
+                "Binary Namespace",
                 "Binary Primitives Core",
                 "Binary Cursor Primitives",
                 "Binary LEB128 Primitives",
