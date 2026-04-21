@@ -1,7 +1,7 @@
 // Binary.Format.swift
 // Namespace for binary data formatting.
 
-import Formatting_Primitives
+import Format_Primitives
 
 extension Binary {
     /// Namespace for binary data formatting.

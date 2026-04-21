@@ -53,7 +53,7 @@ let package = Package(
     dependencies: [
         .package(path: "../swift-bit-primitives"),
         .package(path: "../swift-dimension-primitives"),
-        .package(path: "../swift-formatting-primitives"),
+        .package(path: "../swift-format-primitives"),
         .package(path: "../swift-index-primitives"),
         .package(path: "../swift-memory-primitives"),
         .package(path: "../swift-serializer-primitives"),
@@ -100,7 +100,7 @@ let package = Package(
             name: "Binary Format Primitives",
             dependencies: [
                 "Binary Primitives Core",
-                .product(name: "Formatting Primitives", package: "swift-formatting-primitives"),
+                .product(name: "Format Primitives", package: "swift-format-primitives"),
             ]
         ),
         .target(
