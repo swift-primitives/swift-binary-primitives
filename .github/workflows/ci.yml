@@ -31,7 +31,7 @@ jobs:
       umbrella-module: Binary_Primitives
       umbrella-display-name: "Binary Primitives"
       umbrella-bundle-id: "swift-binary-primitives.Binary-Primitives"
-      umbrella-docc-path: "Sources/Binary Primitives/Documentation.docc"
+      umbrella-docc-path: "Sources/Binary Primitives/Binary Primitives.docc"
       exclude-modules: "Binary_Primitives_Test_Support"
       enable-private-repos: true
     secrets:
