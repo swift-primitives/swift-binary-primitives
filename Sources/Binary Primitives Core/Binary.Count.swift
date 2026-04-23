@@ -1,7 +1,7 @@
 // Binary.Count.swift
 // Non-negative byte count with typed throws.
 
-@_spi(Internal) import Identity_Primitives
+@_spi(Internal) import Tagged_Primitives
 public import Dimension_Primitives
 
 extension Binary {

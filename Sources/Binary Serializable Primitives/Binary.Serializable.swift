@@ -1,7 +1,7 @@
 // Binary.Serializable.swift
 // Streaming byte serialization protocol.
 
-@_spi(Internal) import Identity_Primitives
+@_spi(Internal) import Tagged_Primitives
 public import Dimension_Primitives
 
 /// Protocol for types that can serialize to byte streams.
