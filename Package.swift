@@ -52,6 +52,8 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../swift-bit-primitives"),
+        .package(path: "../swift-cardinal-primitives"),
+        .package(path: "../swift-carrier-primitives"),
         .package(path: "../swift-dimension-primitives"),
         .package(path: "../swift-format-primitives"),
         .package(path: "../swift-index-primitives"),
@@ -72,6 +74,8 @@ let package = Package(
             dependencies: [
                 "Binary Namespace",
                 .product(name: "Bit Primitives", package: "swift-bit-primitives"),
+                .product(name: "Cardinal Primitives", package: "swift-cardinal-primitives"),
+                .product(name: "Carrier Primitives", package: "swift-carrier-primitives"),
                 .product(name: "Dimension Primitives", package: "swift-dimension-primitives"),
                 .product(name: "Index Primitives", package: "swift-index-primitives"),
                 .product(name: "Memory Primitives Core", package: "swift-memory-primitives"),

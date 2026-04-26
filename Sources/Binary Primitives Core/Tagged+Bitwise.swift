@@ -9,6 +9,9 @@
 //
 // ===----------------------------------------------------------------------===//
 
+public import Carrier_Primitives
+public import Cardinal_Primitives
+
 // MARK: - Bitwise Operations for Tagged<Tag, FixedWidthInteger>
 
 // These extensions enable type-safe bitwise operations on Tagged values
@@ -162,7 +165,7 @@ public func >> <Tag, RawValue: FixedWidthInteger, ShiftTag>(
 @inlinable
 public func << <Tag, RawValue: FixedWidthInteger>(
     lhs: Tagged<Tag, RawValue>,
-    rhs: some Cardinal.`Protocol`
+    rhs: some Carrier<Cardinal>
 ) -> Tagged<Tag, RawValue> {
     Tagged(__unchecked: (), lhs.rawValue << rhs)
 }
@@ -171,7 +174,7 @@ public func << <Tag, RawValue: FixedWidthInteger>(
 @inlinable
 public func >> <Tag, RawValue: FixedWidthInteger>(
     lhs: Tagged<Tag, RawValue>,
-    rhs: some Cardinal.`Protocol`
+    rhs: some Carrier<Cardinal>
 ) -> Tagged<Tag, RawValue> {
     Tagged(__unchecked: (), lhs.rawValue >> rhs)
 }
@@ -180,7 +183,7 @@ public func >> <Tag, RawValue: FixedWidthInteger>(
 @inlinable
 public func <<= <Tag, RawValue: FixedWidthInteger>(
     lhs: inout Tagged<Tag, RawValue>,
-    rhs: some Cardinal.`Protocol`
+    rhs: some Carrier<Cardinal>
 ) {
     lhs = lhs << rhs
 }
@@ -189,7 +192,7 @@ public func <<= <Tag, RawValue: FixedWidthInteger>(
 @inlinable
 public func >>= <Tag, RawValue: FixedWidthInteger>(
     lhs: inout Tagged<Tag, RawValue>,
-    rhs: some Cardinal.`Protocol`
+    rhs: some Carrier<Cardinal>
 ) {
     lhs = lhs >> rhs
 }
