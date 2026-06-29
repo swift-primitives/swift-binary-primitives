@@ -129,17 +129,10 @@ let package = Package(
         // import `Binary_Cursor_Primitives` directly (subject-first naming
         // per `[API-NAME-001b]`).
 
-        // MARK: - Format (extracted 2026-05-22, re-homed by domain)
+        // MARK: - Format (extracted 2026-05-22)
         //
-        // The former `Binary.Format` extraction has been superseded by two
-        // domain-specific sibling packages:
-        //   - byte-count notation (`Binary.Format.Bytes`) now lives in
-        //     `swift-byte-formatter-primitives`;
-        //   - radix notation (hex/octal/bits, `Binary.Format.Radix`) now
-        //     lives in `swift-radix-formatter-primitives` as `Radix.Format`.
-        // Consumers import `Byte_Formatter_Primitives` / `Radix_Format_Primitives`
-        // directly (subject-first naming per `[API-NAME-001b]`). The
-        // Format-domain SLI moved with the types to those siblings.
+        // The former `Binary.Format` namespace was extracted and no longer
+        // lives in this package.
 
         // MARK: - Standard Library Integration
         .target(
